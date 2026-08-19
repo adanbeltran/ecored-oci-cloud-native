@@ -119,12 +119,13 @@ La imagen utiliza arquitectura `linux/amd64`, expone `10000/tcp` y conserva exte
 1. Inicie sesión en OCI Console.
 2. Abra el menú de perfil.
 3. Consulte **Tenancy**.
-<img width="508" height="393" alt="image" src="https://github.com/user-attachments/assets/41adfb35-084f-4e08-bce4-68a82f309099" />
+
 
 ```text
 TENANCY_NAME=<nombre-de-la-tenancy>
 ```
 ### Paso a paso
+<img width="508" height="393" alt="image" src="https://github.com/user-attachments/assets/41adfb35-084f-4e08-bce4-68a82f309099" />
 
 <img width="1249" height="456" alt="image" src="https://github.com/user-attachments/assets/a0d40c82-943e-46e6-b95d-499ad2c66095" />
 
@@ -194,9 +195,14 @@ Todos los recursos del taller deben crearse en `ecored-dev`.
 CREDITO_INICIAL=<valor mostrado por OCI>
 ```
 
-3. Capture únicamente la información necesaria para evidenciar la revisión, evitando datos sensibles.
 
-### Verificación
+### Paso a paso
+
+<img width="318" height="644" alt="image" src="https://github.com/user-attachments/assets/8e781089-6bf4-4038-8f84-466f1be7daf0" />
+<img width="419" height="315" alt="image" src="https://github.com/user-attachments/assets/cc096d5f-4b97-4eef-b292-ba828c753e44" />
+<img width="1035" height="709" alt="image" src="https://github.com/user-attachments/assets/cfc8a8ca-06bc-47a8-a4e1-e78d622afb40" />
+
+
 
 La bitácora contiene región, tenancy, compartment y estado inicial de crédito/costo.
 
