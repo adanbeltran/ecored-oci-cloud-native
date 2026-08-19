@@ -605,8 +605,6 @@ Seleccione **Create Internet Gateway**.
 <img width="835" height="682" alt="image" src="https://github.com/user-attachments/assets/5e6371d6-7029-4c7b-a3c5-7248facb9c66" />
 
 
-
-
 `ecored-igw` aparece asociado a `ecored-vcn`.
 
 ## Paso 2.4. Agregar la ruta hacia Internet
@@ -631,7 +629,14 @@ Target: ecored-igw
 
 Guarde la regla.
 
-### Verificación
+### Paso a paso
+
+<img width="938" height="496" alt="image" src="https://github.com/user-attachments/assets/10f53124-36ef-43d4-9705-c4a94d9227fd" />
+<img width="1883" height="691" alt="image" src="https://github.com/user-attachments/assets/540eb1f6-aeb9-4a77-9493-57ea2f952096" />
+<img width="1160" height="524" alt="image" src="https://github.com/user-attachments/assets/b65f66d2-61a7-4048-8902-254a228203e2" />
+
+
+
 
 Debe existir:
 
@@ -664,7 +669,14 @@ Description: EcoRed HTTP laboratorio
 
 Guarde la regla.
 
-### Verificación
+### Paso a Paso
+
+<img width="1572" height="604" alt="image" src="https://github.com/user-attachments/assets/735bdca7-0284-466c-aecf-53b7300f515f" />
+<img width="1660" height="567" alt="image" src="https://github.com/user-attachments/assets/39a93de8-3ce1-4692-89f9-4454728e4ece" />
+<img width="1050" height="505" alt="image" src="https://github.com/user-attachments/assets/95ec7b7c-31fe-4dc2-a460-f766ec90f27a" />
+<img width="1714" height="672" alt="image" src="https://github.com/user-attachments/assets/0d82dc98-89a3-47ff-afdc-729ce2b73db4" />
+
+
 
 La Security List permite tráfico TCP hacia el puerto `10000`.
 
