@@ -8,8 +8,6 @@ La ruta está organizada como una cadena de dependencias: **el resultado verific
 
 ## Siglas generales de la ruta
 
-En el README las siglas principales se definen una sola vez. Cada taller vuelve a definir, al inicio, únicamente las siglas que utiliza.
-
 - **OCI — Oracle Cloud Infrastructure:** Infraestructura de Nube de Oracle.
 - **VCN — Virtual Cloud Network:** Red Virtual en la Nube.
 - **NAT — Network Address Translation:** Traducción de Direcciones de Red.
@@ -150,7 +148,7 @@ ARQUITECTURA DESTINO ECORED EN OCI
 | Pipelines de construcción y despliegue | 10 |
 | Validación integral de la arquitectura | 10 |
 
-## Convenciones para todos los talleres
+## Recomendaciones para todos los talleres
 
 - Utilice EcoRed como proyecto conductor y conserve los nombres de recursos definidos en cada taller.
 - Trabaje dentro del compartment `ecored-dev`, salvo que el procedimiento especifique explícitamente otro alcance.
