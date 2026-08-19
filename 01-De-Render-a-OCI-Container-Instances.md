@@ -119,25 +119,15 @@ La imagen utiliza arquitectura `linux/amd64`, expone `10000/tcp` y conserva exte
 1. Inicie sesión en OCI Console.
 2. Abra el menú de perfil.
 3. Consulte **Tenancy**.
-4. Registre en la bitácora:
+<img width="508" height="393" alt="image" src="https://github.com/user-attachments/assets/41adfb35-084f-4e08-bce4-68a82f309099" />
 
 ```text
 TENANCY_NAME=<nombre-de-la-tenancy>
 ```
+### Paso a paso
 
-### Verificación
+<img width="1249" height="456" alt="image" src="https://github.com/user-attachments/assets/a0d40c82-943e-46e6-b95d-499ad2c66095" />
 
-Debe poder representar:
-
-```text
-Cuenta OCI del estudiante
-        │
-        ▼
-     Tenancy
-        │
-        ▼
- Root Compartment
-```
 
 ## Paso 1.2. Seleccionar la región de trabajo
 
@@ -149,10 +139,11 @@ Cuenta OCI del estudiante
 ```text
 OCI_REGION=<region>
 ```
+### Paso a paso
 
-### Verificación
+<img width="490" height="361" alt="image" src="https://github.com/user-attachments/assets/3b054641-4deb-4309-9274-34eee8489cd0" />
 
-La consola debe mostrar la región seleccionada y la bitácora debe contener su identificador.
+
 
 ## Paso 1.3. Crear el compartment `ecored-dev`
 
@@ -178,12 +169,19 @@ Seleccione **Create Compartment** y espere hasta observar:
 State: Active
 ```
 
-### Verificación
+### Paso a paso
 
-```text
-Tenancy
-└── ecored-dev
-```
+<img width="1810" height="804" alt="image" src="https://github.com/user-attachments/assets/69d6f155-9ce9-4887-809a-10f2159b4291" />
+
+<img width="600" height="430" alt="image" src="https://github.com/user-attachments/assets/a74118e3-6267-47d3-bf07-a34819935e77" />
+
+<img width="1456" height="326" alt="image" src="https://github.com/user-attachments/assets/e33fe589-3167-45e3-825b-4c5a53254de2" />
+
+<img width="1866" height="726" alt="image" src="https://github.com/user-attachments/assets/ab5bf2b7-e36f-4d0c-8d21-0ddce83c6c1f" />
+
+<img width="1151" height="360" alt="image" src="https://github.com/user-attachments/assets/5b9b95ea-6df6-44b1-92cc-a506802aaae3" />
+
+
 
 Todos los recursos del taller deben crearse en `ecored-dev`.
 
