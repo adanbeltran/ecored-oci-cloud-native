@@ -227,6 +227,7 @@ Name: ecored-vcn
 IPv4 CIDR Block: 10.20.0.0/16
 Use DNS hostnames: Enabled
 Compartment: ecored-dev
+DNS Resolver:ecored-vcn
 ```
 
 Seleccione **Create VCN**.
@@ -235,6 +236,12 @@ Seleccione **Create VCN**.
 <img width="675" height="489" alt="image" src="https://github.com/user-attachments/assets/b0c5f474-e896-4c85-877f-9f9ace278518" />
 <img width="711" height="410" alt="image" src="https://github.com/user-attachments/assets/666b9cd0-1117-4eed-b920-857bd67fe22f" />
 <img width="611" height="762" alt="image" src="https://github.com/user-attachments/assets/288095ff-79db-4572-967c-97e70b1b4b16" />
+
+
+<img width="850" height="503" alt="image" src="https://github.com/user-attachments/assets/05548495-a683-4e4b-baee-9e3296e13d8b" />
+<img width="1554" height="285" alt="image" src="https://github.com/user-attachments/assets/6e3296fd-84e0-4a5f-af2e-e8a606a2fb9a" />
+
+
 <img width="858" height="507" alt="image" src="https://github.com/user-attachments/assets/75a582c6-822e-4547-b5bb-045617bfe21e" />
 <img width="1569" height="282" alt="image" src="https://github.com/user-attachments/assets/f9df3747-3b38-4430-8345-e91aafc37515" />
 
