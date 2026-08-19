@@ -740,7 +740,23 @@ En las opciones avanzadas del Container Instance configure:
 Container restart policy: Always
 ```
 
-### Verificación de la fase
+### Paso a paso
+
+<img width="671" height="624" alt="image" src="https://github.com/user-attachments/assets/8018eb62-e036-4781-bb2c-710e5be16042" />
+<img width="815" height="393" alt="image" src="https://github.com/user-attachments/assets/1f934967-20af-4b69-ac5c-7689ac97e7b7" />
+<img width="1120" height="528" alt="image" src="https://github.com/user-attachments/assets/6dc1a414-9c91-4547-91e5-9a1231be69ae" />
+
+<img width="733" height="623" alt="image" src="https://github.com/user-attachments/assets/962d60ee-3f8a-4590-9875-fbe9beef4098" />
+
+<img width="858" height="636" alt="image" src="https://github.com/user-attachments/assets/a9688463-d4c5-429c-9ef9-2423a67dd3e4" />
+<img width="783" height="578" alt="image" src="https://github.com/user-attachments/assets/89b92790-723c-49ab-9d99-d93c3af43c8a" />
+<img width="885" height="678" alt="image" src="https://github.com/user-attachments/assets/d85fc1f8-20d7-43cb-8fc7-41e0b3c56271" />
+
+
+
+
+
+
 
 Antes de continuar confirme:
 
@@ -767,7 +783,13 @@ Image source: External registry
 Image: docker.io/TU_USUARIO/ecored-circular:v1.0
 ```
 
-### Verificación
+### Paso a paso
+
+<img width="1123" height="534" alt="image" src="https://github.com/user-attachments/assets/9d084a3b-6d7d-4222-80d5-067f0ca586b2" />
+<img width="1505" height="691" alt="image" src="https://github.com/user-attachments/assets/d281fb76-953f-4189-9566-9d0ccfd44853" />
+<img width="1533" height="708" alt="image" src="https://github.com/user-attachments/assets/61893982-ae39-4623-8d38-0486091d0fa4" />
+
+
 
 La imagen seleccionada coincide exactamente con la publicada y probada en Docker Hub.
 
