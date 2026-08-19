@@ -1,4 +1,4 @@
-# EcoRed Circular — Ruta de 10 talleres para una arquitectura Cloud Native en Oracle Cloud Infrastructure
+# EcoRed Circular —  Arquitectura Cloud Native en Oracle Cloud Infrastructure
 
 ## Introducción
 
