@@ -45,6 +45,10 @@ Contenedor EcoRed
            └── Firebase
 ```
 
+<img width="1536" height="1024" alt="flujotaller1" src="https://github.com/user-attachments/assets/fde1e830-68d9-453d-aa42-9bfb76d37136" />
+
+
+
 ## 2. Relación con la arquitectura destino
 
 [Ver arquitectura destino de EcoRed](assets/arquitectura-destino-ecored.png)
