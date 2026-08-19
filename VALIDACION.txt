@@ -1,0 +1,13 @@
+VALIDACIÓN DEL PAQUETE ECORED — 10 TALLERES
+
+Archivos de talleres: 10
+01-De-Render-a-OCI-Container-Instances.md: fases=5; README nav=OK; arquitectura destino=OK; siglas=OK; anterior=OK; siguiente=OK
+02-OCIR-y-Networking-Privado.md: fases=4; README nav=OK; arquitectura destino=OK; siglas=OK; anterior=OK; siguiente=OK
+03-EcoRed-en-OKE-Kubernetes.md: fases=4; README nav=OK; arquitectura destino=OK; siglas=OK; anterior=OK; siguiente=OK
+04-Resiliencia-Escalabilidad-y-Entrada-OKE.md: fases=4; README nav=OK; arquitectura destino=OK; siglas=OK; anterior=OK; siguiente=OK
+05-Descomposicion-EcoRed-en-Microservicios.md: fases=5; README nav=OK; arquitectura destino=OK; siglas=OK; anterior=OK; siguiente=OK
+06-API-Gateway-Autenticacion-Comunicacion-Sincrona.md: fases=4; README nav=OK; arquitectura destino=OK; siglas=OK; anterior=OK; siguiente=OK
+07-Arquitectura-Event-Driven-OCI-Streaming.md: fases=4; README nav=OK; arquitectura destino=OK; siglas=OK; anterior=OK; siguiente=OK
+08-Persistencia-Distribuida-y-Servicios-Administrados.md: fases=5; README nav=OK; arquitectura destino=OK; siglas=OK; anterior=OK; siguiente=OK
+09-Seguridad-Observabilidad-y-Monitoreo.md: fases=4; README nav=OK; arquitectura destino=OK; siglas=OK; anterior=OK; siguiente=OK
+10-CICD-e-Integracion-Arquitectura-Destino.md: fases=5; README nav=OK; arquitectura destino=OK; siglas=OK; anterior=OK; siguiente=OK
