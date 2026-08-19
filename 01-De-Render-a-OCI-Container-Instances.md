@@ -241,11 +241,6 @@ Seleccione **Create VCN**.
 <img width="850" height="503" alt="image" src="https://github.com/user-attachments/assets/05548495-a683-4e4b-baee-9e3296e13d8b" />
 <img width="1554" height="285" alt="image" src="https://github.com/user-attachments/assets/6e3296fd-84e0-4a5f-af2e-e8a606a2fb9a" />
 
-
-<img width="858" height="507" alt="image" src="https://github.com/user-attachments/assets/75a582c6-822e-4547-b5bb-045617bfe21e" />
-<img width="1569" height="282" alt="image" src="https://github.com/user-attachments/assets/f9df3747-3b38-4430-8345-e91aafc37515" />
-
-
 ## Apoyo didáctico: configuración inicial de la VCN
 
 Para EcoRed se crea la **VCN (Virtual Cloud Network — Red Virtual en la Nube)** como espacio de red privado donde posteriormente se desplegarán los recursos de la aplicación.
@@ -340,8 +335,249 @@ Security List: Default Security List
 Seleccione **Create Subnet**.
 
 ### Verificación
+<img width="665" height="365" alt="image" src="https://github.com/user-attachments/assets/f8463787-bbc8-4d66-9049-7ae5cd06c885" />
+
+<img width="828" height="706" alt="image" src="https://github.com/user-attachments/assets/6bbcf5f9-9806-4f39-9df4-b823707236ac" />
+<img width="649" height="338" alt="image" src="https://github.com/user-attachments/assets/56878a88-85ab-43f2-912d-f3035a34576a" />
+
+
+
 
 La subnet debe aparecer dentro de `ecored-vcn` con CIDR `10.20.10.0/24` y capacidad de asignar IPv4 pública.
+
+# Apoyo didáctico — Creación de la Subnet de EcoRed
+
+## ¿Qué se está creando?
+
+La **Subnet (subred)** es una subdivisión de la **VCN (Virtual Cloud Network — Red Virtual en la Nube)** donde se conectará la **OCI Container Instance** que ejecutará EcoRed.
+
+```text
+ecored-vcn
+10.20.0.0/16
+│
+└── ecored-public-subnet
+    10.20.10.0/24
+        │
+        ▼
+OCI Container Instance
+        │
+        ▼
+EcoRed
+```
+
+La VCN representa la red completa de EcoRed y la subnet reserva una parte de esa red para una función determinada.
+
+---
+
+## Configuración utilizada
+
+```text
+Name:
+ecored-public-subnet
+
+Compartment:
+ecored-dev
+
+Subnet Type:
+Regional
+
+IPv4 CIDR:
+10.20.10.0/24
+
+Subnet Access:
+Public Subnet
+
+DNS Resolution:
+Enabled
+
+Route Table:
+Default Route Table for ecored-vcn
+
+Security List:
+Default Security List for ecored-vcn
+
+DHCP Options:
+Default DHCP Options for ecored-vcn
+```
+
+---
+
+## Subnet Type: Regional
+
+Se selecciona:
+
+```text
+Regional
+```
+
+Esto permite que la subnet pueda ser utilizada por recursos de la región sin limitarla innecesariamente a un único **AD (Availability Domain — Dominio de Disponibilidad)**.
+
+Para EcoRed proporciona una red más flexible para la evolución posterior de la arquitectura.
+
+---
+
+## IPv4 CIDR: `10.20.10.0/24`
+
+La VCN completa utiliza:
+
+```text
+10.20.0.0/16
+```
+
+y esta subnet utiliza una parte de ese rango:
+
+```text
+10.20.10.0/24
+```
+
+```text
+VCN 10.20.0.0/16
+│
+├── 10.20.10.0/24  ← EcoRed inicialmente
+├── 10.20.20.0/24  ← uso futuro
+├── 10.20.30.0/24  ← uso futuro
+└── ...
+```
+
+El `/24` proporciona un segmento suficientemente pequeño para los recursos de esta función y permite reservar otros rangos para componentes posteriores.
+
+**Analogía:** la VCN es una ciudad y cada subnet es un barrio destinado a una función específica.
+
+---
+
+## ¿Por qué Public Subnet?
+
+En el Taller 1, EcoRed debe ser accesible directamente desde Internet para comprobar que el contenedor funciona correctamente en OCI.
+
+```text
+Internet
+   │
+   ▼
+IPv4 pública
+   │
+   ▼
+ecored-public-subnet
+   │
+   ▼
+Container Instance
+   │
+   ▼
+EcoRed
+```
+
+Una subnet pública **no significa que todo el tráfico esté permitido**. Para que EcoRed pueda ser accedido deben existir conjuntamente:
+
+```text
+Subnet pública
+      +
+IPv4 pública
+      +
+Route Table
+      +
+Internet Gateway
+      +
+regla TCP :10000
+```
+
+---
+
+## Route Table
+
+La **Route Table (tabla de rutas)** determina por dónde debe viajar el tráfico.
+
+Para acceder a Internet se utilizará:
+
+```text
+0.0.0.0/0
+      ↓
+Internet Gateway
+```
+
+Por tanto:
+
+```text
+Route Table = POR DÓNDE viaja el tráfico.
+```
+
+---
+
+## Security List
+
+La **Security List (lista de seguridad)** determina qué tráfico puede entrar o salir de la subnet.
+
+EcoRed escucha en:
+
+```text
+TCP 10000
+```
+
+por lo que posteriormente se configurará una regla que permita acceder a ese puerto.
+
+```text
+Internet
+   │
+ TCP :10000
+   ▼
+Security List
+   │
+   ▼
+EcoRed
+```
+
+Por tanto:
+
+```text
+Route Table   → por dónde viaja.
+Security List → qué tráfico está permitido.
+```
+
+---
+
+## DNS Resolution
+
+Se mantiene:
+
+```text
+DNS Resolution: Enabled
+```
+
+**DNS (Domain Name System — Sistema de Nombres de Dominio)** permite resolver nombres de recursos en direcciones IP.
+
+Esto será especialmente útil cuando EcoRed evolucione hacia múltiples servicios y Kubernetes, evitando depender directamente de direcciones IP.
+
+---
+
+## Relación con la arquitectura destino
+
+En el Taller 1 se utiliza una subnet pública para simplificar el primer despliegue:
+
+```text
+Internet
+   ↓
+Subnet pública
+   ↓
+Container Instance
+   ↓
+EcoRed
+```
+
+Más adelante la arquitectura evolucionará hacia:
+
+```text
+Internet
+   ↓
+API Gateway / Load Balancer
+   ↓
+Subnets privadas
+   ↓
+OKE / Kubernetes
+   ↓
+Microservicios EcoRed
+```
+
+> **Idea clave:** la subnet permite dividir la red de EcoRed según la responsabilidad de cada componente. En este primer taller se utiliza una subnet pública para ejecutar y probar EcoRed; posteriormente la misma VCN será segmentada para soportar componentes públicos y privados de la arquitectura Cloud Native.
+
+
 
 ## Paso 2.3. Crear el Internet Gateway
 
@@ -361,7 +597,15 @@ Compartment: ecored-dev
 
 Seleccione **Create Internet Gateway**.
 
-### Verificación
+### paso a paso
+
+<img width="679" height="679" alt="image" src="https://github.com/user-attachments/assets/3043b81c-18ea-4b56-8d86-06b80b141a1a" />
+
+<img width="712" height="364" alt="image" src="https://github.com/user-attachments/assets/80efcf13-03f8-4adb-a8bf-8dc0515abe44" />
+<img width="835" height="682" alt="image" src="https://github.com/user-attachments/assets/5e6371d6-7029-4c7b-a3c5-7248facb9c66" />
+
+
+
 
 `ecored-igw` aparece asociado a `ecored-vcn`.
 
