@@ -231,14 +231,91 @@ Compartment: ecored-dev
 
 Seleccione **Create VCN**.
 
-### Verificación
+### Paso a paso
+<img width="675" height="489" alt="image" src="https://github.com/user-attachments/assets/b0c5f474-e896-4c85-877f-9f9ace278518" />
+<img width="711" height="410" alt="image" src="https://github.com/user-attachments/assets/666b9cd0-1117-4eed-b920-857bd67fe22f" />
+<img width="611" height="762" alt="image" src="https://github.com/user-attachments/assets/288095ff-79db-4572-967c-97e70b1b4b16" />
+<img width="858" height="507" alt="image" src="https://github.com/user-attachments/assets/75a582c6-822e-4547-b5bb-045617bfe21e" />
+<img width="1569" height="282" alt="image" src="https://github.com/user-attachments/assets/f9df3747-3b38-4430-8345-e91aafc37515" />
 
-Debe existir:
+
+## Apoyo didáctico: configuración inicial de la VCN
+
+Para EcoRed se crea la **VCN (Virtual Cloud Network — Red Virtual en la Nube)** como espacio de red privado donde posteriormente se desplegarán los recursos de la aplicación.
+
+### IPv4 CIDR: `10.20.0.0/16`
+
+`10.20.0.0/16` define el rango de direcciones IPv4 privadas disponible para la VCN.
+
+* `10.20.0.0` identifica el inicio del rango.
+* `/16` indica que los primeros **16 bits** identifican la red.
+* Quedan 16 bits para direccionamiento interno.
+* El rango permite aproximadamente **65.536 direcciones IPv4 teóricas**.
+
+La elección de `/16` permite dividir posteriormente la VCN en subredes más pequeñas:
 
 ```text
-ecored-vcn
-10.20.0.0/16
+VCN EcoRed: 10.20.0.0/16
+│
+├── 10.20.10.0/24 → aplicación
+├── 10.20.20.0/24 → balanceadores
+├── 10.20.30.0/24 → workers de Kubernetes
+├── 10.20.40.0/24 → servicios/API
+└── 10.20.50.0/24 → pods
 ```
+
+**Analogía:** `10.20.0.0/16` puede verse como toda una ciudad y cada subnet `/24` como un barrio reservado para una función determinada.
+
+### IPv6
+
+OCI permite crear redes con IPv4 e IPv6. Sin embargo, **IPv6 no es necesario en este taller**, porque EcoRed puede funcionar completamente utilizando IPv4.
+
+IPv6 sería conveniente posteriormente si existieran requisitos como:
+
+* clientes o sistemas externos que utilicen IPv6;
+* infraestructura empresarial dual-stack IPv4/IPv6;
+* integración con redes que requieran IPv6.
+
+Por ahora se deja deshabilitado para no introducir complejidad innecesaria.
+
+### DNS Resolution
+
+Se recomienda mantener **DNS Resolution habilitado**.
+
+**DNS (Domain Name System — Sistema de Nombres de Dominio)** permite resolver nombres de recursos en direcciones IP.
+
+```text
+Nombre del recurso
+      │
+      ▼
+     DNS
+      │
+      ▼
+Dirección IP
+```
+
+Ejemplo conceptual:
+
+```text
+empresas
+   ↓ DNS
+10.20.30.25
+```
+
+Esto permite que los componentes de EcoRed puedan localizarse mediante nombres en lugar de depender directamente de direcciones IP, algo especialmente importante cuando posteriormente se utilicen Kubernetes y microservicios.
+
+### Configuración recomendada para el taller
+
+```text
+Name:                ecored-vcn
+Compartment:         ecored-dev
+IPv4 CIDR Block:     10.20.0.0/16
+IPv6:                No habilitar por ahora
+DNS Resolution:      Enabled
+DNS Label:           ecoredvcn
+```
+**Idea clave:** CIDR define el espacio de direcciones de la red; `/16` determina su tamaño; IPv6 agrega un esquema adicional de direccionamiento que todavía no necesitamos; y DNS Resolution facilita que los recursos se encuentren mediante nombres en lugar de depender únicamente de direcciones IP.
+
 
 ## Paso 2.2. Crear la subnet pública
 
