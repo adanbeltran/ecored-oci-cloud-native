@@ -734,52 +734,8 @@ Subnet: ecored-public-subnet
 Public IPv4 address: Assign a public IPv4 address
 ```
 
-Use la Security List configurada en la subnet para el acceso al puerto `10000`.
+## Paso 3.5. Definir nombre e imagen
 
-## Paso 3.5. Configurar la política de reinicio
-
-En las opciones avanzadas del Container Instance configure:
-
-```text
-Container restart policy: Always
-```
-
-### Paso a paso
-
-<img width="671" height="624" alt="image" src="https://github.com/user-attachments/assets/8018eb62-e036-4781-bb2c-710e5be16042" />
-<img width="815" height="393" alt="image" src="https://github.com/user-attachments/assets/1f934967-20af-4b69-ac5c-7689ac97e7b7" />
-<img width="1120" height="528" alt="image" src="https://github.com/user-attachments/assets/6dc1a414-9c91-4547-91e5-9a1231be69ae" />
-
-<img width="733" height="623" alt="image" src="https://github.com/user-attachments/assets/962d60ee-3f8a-4590-9875-fbe9beef4098" />
-
-<img width="858" height="636" alt="image" src="https://github.com/user-attachments/assets/a9688463-d4c5-429c-9ef9-2423a67dd3e4" />
-<img width="783" height="578" alt="image" src="https://github.com/user-attachments/assets/89b92790-723c-49ab-9d99-d93c3af43c8a" />
-<img width="885" height="678" alt="image" src="https://github.com/user-attachments/assets/d85fc1f8-20d7-43cb-8fc7-41e0b3c56271" />
-
-
-
-
-
-
-
-Antes de continuar confirme:
-
-```text
-Container Instance: ecored-ci
-Compartment: ecored-dev
-VCN: ecored-vcn
-Subnet: ecored-public-subnet
-Public IPv4: Yes
-Restart policy: Always
-```
-
----
-
-# Fase 4. Configurar y crear el contenedor EcoRed
-
-## Paso 4.1. Definir nombre e imagen
-
-En **Configure containers** configure:
 
 ```text
 Name: ecored
@@ -918,6 +874,46 @@ PUBLIC_IP=<IPv4 pública asignada>
 ### Verificación de la fase
 
 La Container Instance está `Active`, tiene IPv4 pública y el contenedor `ecored` aparece ejecutándose.
+
+---
+
+
+## Paso 3.5. Configurar la política de reinicio
+
+En las opciones avanzadas del Container Instance configure:
+
+```text
+Container restart policy: Always
+```
+
+### Paso a paso
+
+<img width="671" height="624" alt="image" src="https://github.com/user-attachments/assets/8018eb62-e036-4781-bb2c-710e5be16042" />
+<img width="815" height="393" alt="image" src="https://github.com/user-attachments/assets/1f934967-20af-4b69-ac5c-7689ac97e7b7" />
+<img width="1120" height="528" alt="image" src="https://github.com/user-attachments/assets/6dc1a414-9c91-4547-91e5-9a1231be69ae" />
+
+<img width="733" height="623" alt="image" src="https://github.com/user-attachments/assets/962d60ee-3f8a-4590-9875-fbe9beef4098" />
+
+<img width="858" height="636" alt="image" src="https://github.com/user-attachments/assets/a9688463-d4c5-429c-9ef9-2423a67dd3e4" />
+<img width="783" height="578" alt="image" src="https://github.com/user-attachments/assets/89b92790-723c-49ab-9d99-d93c3af43c8a" />
+<img width="885" height="678" alt="image" src="https://github.com/user-attachments/assets/d85fc1f8-20d7-43cb-8fc7-41e0b3c56271" />
+
+
+
+
+
+
+
+Antes de continuar confirme:
+
+```text
+Container Instance: ecored-ci
+Compartment: ecored-dev
+VCN: ecored-vcn
+Subnet: ecored-public-subnet
+Public IPv4: Yes
+Restart policy: Always
+```
 
 ---
 
