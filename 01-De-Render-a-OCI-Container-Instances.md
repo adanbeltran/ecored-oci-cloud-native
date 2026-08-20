@@ -686,9 +686,45 @@ La Security List permite tráfico TCP hacia el puerto `10000`.
 
 ---
 
-# Fase 3. Crear la Container Instance
+# Fase 3. Crear y publicar EcoRed con el asistente de OCI Container Instances
 
-## Paso 3.1. Abrir Container Instances
+En esta fase se completa **todo el asistente de creación de OCI Container Instances**. No se debe abandonar el asistente después de configurar la red: la configuración de la imagen, variables de entorno, credencial Firebase, opciones de inicio y publicación del contenedor forman parte de la misma operación.
+
+Oracle organiza actualmente el asistente en este orden:
+
+```text
+1. Basic information
+       ↓
+2. Networking
+       ↓
+3. Storage
+       ↓
+4. Containers
+       ↓
+5. Review Details
+       ↓
+Create
+       ↓
+Container Instance + contenedor EcoRed
+```
+
+La lógica es equivalente al despliegue anterior en Render:
+
+| Render | OCI Container Instances |
+|---|---|
+| Web Service | Container Instance |
+| Existing Image | External registry |
+| Docker Hub image | Registry hostname + Repository + Tag |
+| Environment Variables | Environmental variables |
+| Secret File de Firebase | Variable temporal + creación del archivo al iniciar |
+| Docker Command vacío porque la imagen ya tiene `CMD` | Startup options para reconstruir temporalmente el archivo Firebase y luego ejecutar `/start.sh` |
+| Deploy Web Service | Review Details → Create |
+
+En Render se utilizaron `PORT`, `DJANGO_DEBUG`, `DJANGO_SECRET_KEY`, `MONGODB_URI`, `MONGODB_DB_NAME` y `FIREBASE_CREDENTIALS_PATH`; las variables `VITE_*` no se agregaron porque ya quedaron incorporadas durante el build del frontend.
+
+---
+
+## Paso 3.1. Abrir el asistente
 
 En OCI Console abra:
 
@@ -698,79 +734,403 @@ Developer Services
 → Container Instances
 ```
 
-Seleccione el compartment `ecored-dev` y después **Create container instance**.
+Seleccione:
 
-## Paso 3.2. Configurar datos básicos y placement
+```text
+Compartment: ecored-dev
+```
+
+y después:
+
+```text
+Create container instance
+```
+
+A partir de este punto complete el asistente hasta llegar a **Create**.
+
+---
+
+## Paso 3.2. Basic information — datos básicos de la Container Instance
+
+En la sección **Basic information** configure:
+
+```text
+Name: ecored-ci
+Create in compartment: ecored-dev
+```
+
+### Availability domain
+
+Seleccione el dominio disponible en su región, por ejemplo:
+
+```text
+AD 1
+```
+
+Para esta práctica deje:
+
+```text
+Specify fault domain: Off
+```
+
+### Shape
+
+Utilice una shape x86 compatible con la imagen `linux/amd64`. En la consola puede aparecer, por ejemplo:
+
+```text
+CI.Standard.E4.Flex
+```
+
+La shape determina la CPU y memoria disponibles para la Container Instance. Para esta primera práctica puede conservar la configuración propuesta por OCI si es compatible con la imagen.
+
+### Containers Behavior
+
+En:
+
+```text
+Container restart policy
+```
+
+seleccione:
+
+```text
+Always
+```
+
+Esta política es adecuada para EcoRed porque se trata de una aplicación web que debe permanecer ejecutándose.
+
+No es necesario agregar Tags para completar esta práctica.
+
+### Paso a paso
+
+![Basic information](assets/fase3/01-basic-information.png)
+
+---
+
+## Paso 3.3. Networking — conectar la Container Instance a la red creada
+
+Expanda la sección:
+
+```text
+Networking
+```
+
+### Virtual Network and Subnet
+
+Seleccione:
+
+```text
+Primary network:
+Select existing virtual cloud network
+```
 
 Configure:
 
 ```text
-Name: ecored-ci
-Create in Compartment: ecored-dev
-Availability Domain: <disponible en la región>
-Fault Domain: Automatic
+Virtual cloud network compartment: ecored-dev
+Virtual cloud network: ecored-vcn
 ```
 
-## Paso 3.3. Seleccionar una shape compatible
-
-La imagen existente es `linux/amd64`. Seleccione una shape x86 compatible disponible para Container Instances.
-
-Como punto inicial de laboratorio, configure recursos suficientes para ejecutar EcoRed; por ejemplo:
+En **Subnet** seleccione:
 
 ```text
-OCPU: 1
-Memory: 2 GB
+Select existing subnet
+
+Subnet compartment: ecored-dev
+Subnet: ecored-public-subnet (regional)
 ```
 
-Registre la shape finalmente utilizada.
+### Private IPv4 address
 
-## Paso 3.4. Configurar networking
-
-En **Networking** seleccione:
+Deje el campo vacío. OCI asignará automáticamente una dirección IPv4 privada disponible dentro del CIDR:
 
 ```text
-Virtual Cloud Network: ecored-vcn
-Subnet: ecored-public-subnet
-Public IPv4 address: Assign a public IPv4 address
+10.20.10.0/24
 ```
 
-## Paso 3.5. Definir nombre e imagen
+### Public IPv4 address
 
+Seleccione:
 
 ```text
-Name: ecored
-Image source: External registry
-Image: docker.io/TU_USUARIO/ecored-circular:v1.0
+Assign a public IPv4 address
+```
+
+La IPv4 pública permitirá realizar posteriormente la prueba:
+
+```text
+http://<PUBLIC_IP>:10000
+```
+
+### Network Security
+
+En la pantalla aparece:
+
+```text
+Use network security groups to control traffic
+```
+
+Déjelo:
+
+```text
+Off
+```
+
+Esta opción corresponde a **NSG (Network Security Group)**, no a la Security List. La regla TCP `10000` ya fue configurada en la fase anterior en la **Default Security List** asociada a `ecored-public-subnet`.
+
+Por tanto:
+
+```text
+ecored-ci
+   ↓
+VNIC
+   ↓
+ecored-public-subnet
+   ↓
+Default Security List
+   ↓
+TCP :10000
+```
+
+### DNS Settings
+
+Puede conservar:
+
+```text
+Assign a private DNS record
+```
+
+y permitir que OCI asigne el hostname correspondiente.
+
+### Paso a paso
+
+![Networking](assets/fase3/02-networking.png)
+
+Antes de continuar confirme:
+
+```text
+VCN:          ecored-vcn
+Subnet:       ecored-public-subnet (regional)
+Public IPv4:  Assign a public IPv4 address
+NSG:          Off
+```
+
+---
+
+## Paso 3.4. Storage — continuar sin agregar almacenamiento adicional
+
+La siguiente sección del asistente es:
+
+```text
+Storage
+```
+
+EcoRed no requiere agregar un volumen persistente para esta práctica. Los datos de negocio continúan almacenándose en MongoDB Atlas y la credencial Firebase será reconstruida al iniciar el contenedor.
+
+Por tanto, deje:
+
+```text
+No items to display
+```
+
+y continúe con:
+
+```text
+Next
 ```
 
 ### Paso a paso
 
-<img width="1123" height="534" alt="image" src="https://github.com/user-attachments/assets/9d084a3b-6d7d-4222-80d5-067f0ca586b2" />
-<img width="1505" height="691" alt="image" src="https://github.com/user-attachments/assets/d281fb76-953f-4189-9566-9d0ccfd44853" />
-<img width="1533" height="708" alt="image" src="https://github.com/user-attachments/assets/61893982-ae39-4623-8d38-0486091d0fa4" />
+![Storage](assets/fase3/03-storage.png)
 
+---
 
+## Paso 3.5. Containers — agregar el contenedor EcoRed
 
-La imagen seleccionada coincide exactamente con la publicada y probada en Docker Hub.
-
-## Paso 4.2. Configurar variables de entorno
-
-Agregue las variables requeridas por el backend, utilizando los mismos valores funcionales del despliegue anterior:
+En la sección:
 
 ```text
-PORT=10000
-DJANGO_DEBUG=False
-DJANGO_SECRET_KEY=<valor real>
-MONGODB_URI=<valor real>
-MONGODB_DB_NAME=<valor real>
-FIREBASE_CREDENTIALS_PATH=/etc/secrets/firebase-service-account.json
+Containers
 ```
 
-Agregue cualquier otra variable del backend requerida por EcoRed.
+seleccione:
 
-## Paso 4.3. Preparar la credencial Firebase como variable
+```text
+Add container
+```
 
-Desde PowerShell, en el proyecto EcoRed, convierta el archivo a una sola línea:
+Se abrirá el formulario **Add container**.
+
+Configure:
+
+```text
+Name: ecored
+```
+
+### Paso a paso
+
+![Add container](assets/fase3/04-add-container.png)
+
+---
+
+## Paso 3.6. Image — utilizar exactamente la imagen publicada en Docker Hub
+
+En:
+
+```text
+Image
+```
+
+seleccione:
+
+```text
+Select image
+```
+
+Después seleccione:
+
+```text
+External registry
+```
+
+La consola actual solicita la imagen en tres campos separados. Configure:
+
+```text
+Registry hostname:
+docker.io
+
+Repository:
+TU_USUARIO/ecored-circular
+
+Tag:
+v1.0
+```
+
+Como el repositorio utilizado en esta práctica es público:
+
+```text
+Registry credentials type:
+None
+```
+
+La combinación representa exactamente:
+
+```text
+docker.io/TU_USUARIO/ecored-circular:v1.0
+```
+
+### Relación con Render
+
+En Render se escribió una única referencia:
+
+```text
+docker.io/TU_USUARIO/ecored-circular:v1.0
+```
+
+OCI separa esa misma referencia:
+
+```text
+docker.io                     → Registry hostname
+TU_USUARIO/ecored-circular    → Repository
+v1.0                          → Tag
+```
+
+No se está construyendo una nueva imagen. OCI descargará el mismo artefacto ya validado en Docker Hub y Render.
+
+Seleccione:
+
+```text
+Select image
+```
+
+para regresar al formulario **Add container**.
+
+### Paso a paso
+
+![External registry](assets/fase3/05-external-registry.png)
+
+---
+
+## Paso 3.7. Environmental variables — trasladar la configuración utilizada en Render
+
+En Render se utilizó:
+
+```text
+Environment Variables
+→ Add from .env
+```
+
+a partir de:
+
+```text
+backend/.env
+```
+
+En OCI Container Instances agregue las variables mediante:
+
+```text
+Environmental variables
+→ + Another variable
+```
+
+Configure como mínimo:
+
+| Variable | Valor |
+|---|---|
+| `PORT` | `10000` |
+| `DJANGO_DEBUG` | `False` |
+| `DJANGO_SECRET_KEY` | `<mismo valor funcional usado en Render>` |
+| `MONGODB_URI` | `<mismo valor funcional usado en Render>` |
+| `MONGODB_DB_NAME` | `<mismo valor funcional usado en Render>` |
+| `FIREBASE_CREDENTIALS_PATH` | `/etc/secrets/firebase-service-account.json` |
+
+Si `backend/.env` contiene otras variables requeridas por EcoRed, agréguelas también.
+
+### No agregar las variables `VITE_*`
+
+Las variables:
+
+```text
+VITE_*
+```
+
+no deben volver a configurarse porque fueron procesadas durante:
+
+```text
+npm run build
+```
+
+y quedaron integradas en el frontend React compilado dentro de la imagen.
+
+---
+
+## Paso 3.8. Preparar la credencial Firebase utilizada anteriormente como Secret File
+
+En Render se creó:
+
+```text
+Advanced
+→ Secret Files
+→ Add Secret File
+```
+
+con:
+
+```text
+firebase-service-account.json
+```
+
+y Render lo expuso en:
+
+```text
+/etc/secrets/firebase-service-account.json
+```
+
+Para conservar la misma ruta sin introducir otro servicio OCI en este primer taller, el JSON se entregará como variable y se reconstruirá como archivo cuando arranque el contenedor.
+
+### Convertir el JSON a una sola línea
+
+Desde PowerShell, en el proyecto EcoRed:
 
 ```powershell
 (Get-Content .\backend\firebase-service-account.json -Raw |
@@ -778,36 +1138,74 @@ Desde PowerShell, en el proyecto EcoRed, convierta el archivo a una sola línea:
   ConvertTo-Json -Compress)
 ```
 
-Copie el resultado y configure en Container Instances:
+Copie el resultado completo.
+
+En **Environmental variables** agregue:
 
 ```text
-FIREBASE_SERVICE_ACCOUNT_JSON=<json-completo-en-una-linea>
+Name:
+FIREBASE_SERVICE_ACCOUNT_JSON
+
+Value:
+<JSON completo en una sola línea>
 ```
 
-Mantenga:
+Mantenga además:
 
 ```text
 FIREBASE_CREDENTIALS_PATH=/etc/secrets/firebase-service-account.json
 ```
 
-No publique el contenido del JSON en Git, capturas o entregables.
+### Seguridad de la evidencia
 
-## Paso 4.4. Configurar Startup options
+No publique ni incluya en capturas los valores reales de:
 
-Configure:
+```text
+FIREBASE_SERVICE_ACCOUNT_JSON
+DJANGO_SECRET_KEY
+MONGODB_URI
+```
+
+Esta adaptación se utiliza para mantener el laboratorio enfocado en Container Instances. La gestión de secretos con servicios especializados de OCI se abordará posteriormente.
+
+---
+
+## Paso 3.9. Startup options — reconstruir el archivo Firebase y ejecutar la imagen
+
+La imagen de EcoRed ya contiene:
+
+```text
+CMD ["/start.sh"]
+```
+
+En Render se dejó **Docker Command** vacío para utilizar ese comando definido por la imagen.
+
+En OCI se realizará una acción previa: reconstruir temporalmente:
+
+```text
+/etc/secrets/firebase-service-account.json
+```
+
+y después ejecutar el mismo:
+
+```text
+/start.sh
+```
+
+En **Startup options** configure:
 
 ```text
 Command:
 /bin/sh
 ```
 
-Argumento inicial:
+Como argumentos configure:
 
 ```text
 -c
 ```
 
-Comando:
+y:
 
 ```text
 mkdir -p /etc/secrets &&
@@ -816,110 +1214,241 @@ chmod 600 /etc/secrets/firebase-service-account.json &&
 exec /start.sh
 ```
 
-El flujo de arranque será:
+Conceptualmente:
 
 ```text
 FIREBASE_SERVICE_ACCOUNT_JSON
             │
             ▼
-archivo efímero
-/etc/secrets/firebase-service-account.json
+        /bin/sh -c
             │
             ▼
-/start.sh
+crea /etc/secrets/firebase-service-account.json
             │
             ▼
-Nginx + Gunicorn + Django + React
+       exec /start.sh
+            │
+            ▼
+      Nginx :10000
+        │       │
+      React   Gunicorn → Django
 ```
 
-## Paso 4.5. Crear la Container Instance
+La imagen `docker.io/TU_USUARIO/ecored-circular:v1.0` no se modifica ni se reconstruye.
 
-Revise:
+---
+
+## Paso 3.10. Security — conservar la configuración compatible con la imagen actual
+
+En la sección **Security** del contenedor conserve la configuración predeterminada para esta práctica.
+
+Deje desactivados:
 
 ```text
-Container Instance: ecored-ci
-Container: ecored
-Image: docker.io/TU_USUARIO/ecored-circular:v1.0
-Network: ecored-vcn
-Subnet: ecored-public-subnet
-Public IPv4: Yes
+Enable read-only root filesystem
+Run as non-root user
+```
+
+El comando de inicio necesita crear:
+
+```text
+/etc/secrets/firebase-service-account.json
+```
+
+antes de ejecutar `/start.sh`.
+
+Mantenga sin cambios las capacidades Linux predeterminadas.
+
+### Paso a paso
+
+![Container security](assets/fase3/06-container-security.png)
+
+---
+
+## Paso 3.11. Guardar el contenedor dentro del asistente
+
+Después de comprobar:
+
+```text
+Name: ecored
+
+Image:
+docker.io/TU_USUARIO/ecored-circular:v1.0
+
+Environmental variables:
+PORT
+DJANGO_DEBUG
+DJANGO_SECRET_KEY
+MONGODB_URI
+MONGODB_DB_NAME
+FIREBASE_CREDENTIALS_PATH
+FIREBASE_SERVICE_ACCOUNT_JSON
+
+Startup options:
+creación del archivo Firebase
++
+exec /start.sh
+```
+
+seleccione el botón que guarda/agrega el contenedor al asistente.
+
+Debe regresar a **Containers** y observar el contenedor:
+
+```text
+ecored
+```
+
+---
+
+## Paso 3.12. Review Details — revisar antes de publicar
+
+Seleccione:
+
+```text
+Next
+```
+
+hasta llegar a:
+
+```text
+Review Details
+```
+
+Revise la configuración completa.
+
+### Container Instance
+
+```text
+Name: ecored-ci
+Compartment: ecored-dev
 Restart policy: Always
 ```
 
-Seleccione **Create**.
-
-## Paso 4.6. Esperar el estado `Active`
-
-OCI descargará la imagen, creará el contenedor y ejecutará el comando de inicio. Espere hasta que la Container Instance muestre:
+### Networking
 
 ```text
-State: Active
+VCN: ecored-vcn
+Subnet: ecored-public-subnet
+Public IPv4 address: Yes
 ```
 
-## Paso 4.7. Registrar la IPv4 pública
+### Container
+
+```text
+Name: ecored
+Registry hostname: docker.io
+Repository: TU_USUARIO/ecored-circular
+Tag: v1.0
+```
+
+### Aplicación
+
+Confirme:
+
+```text
+PORT=10000
+DJANGO_DEBUG=False
+FIREBASE_CREDENTIALS_PATH=/etc/secrets/firebase-service-account.json
+```
+
+y compruebe que existen, sin exponer sus valores reales:
+
+```text
+DJANGO_SECRET_KEY
+MONGODB_URI
+MONGODB_DB_NAME
+FIREBASE_SERVICE_ACCOUNT_JSON
+```
+
+---
+
+## Paso 3.13. Create — publicar EcoRed
+
+Seleccione:
+
+```text
+Create
+```
+
+Este botón completa el asistente.
+
+OCI realizará automáticamente:
+
+```text
+Docker Hub
+    │ pull
+    ▼
+docker.io/TU_USUARIO/ecored-circular:v1.0
+    │
+    ▼
+OCI Container Instance: ecored-ci
+    │
+    ▼
+Container: ecored
+    │
+    ▼
+Startup options
+    │
+    ▼
+/start.sh
+    │
+    ▼
+EcoRed
+```
+
+No se ejecutan manualmente `docker pull` ni `docker run`: OCI Container Instances descarga y despliega la imagen como parte de la creación del recurso.
+
+---
+
+## Paso 3.14. Esperar a que la publicación finalice
+
+Espere hasta observar:
+
+```text
+Container Instance: ecored-ci
+State: Active
+```
 
 Abra:
 
 ```text
 ecored-ci
-→ Details
+→ Containers
 ```
 
-Localice la VNIC y registre:
+y compruebe que existe:
 
 ```text
-PUBLIC_IP=<IPv4 pública asignada>
+ecored
 ```
 
-### Verificación de la fase
+Después, en los detalles de la VNIC, registre:
 
-La Container Instance está `Active`, tiene IPv4 pública y el contenedor `ecored` aparece ejecutándose.
+```text
+PUBLIC_IP=<IPv4 pública asignada por OCI>
+```
+
+### Verificación final de la Fase 3
+
+La fase termina cuando se cumplen:
+
+```text
+1. ecored-ci está Active
+2. el contenedor ecored fue creado
+3. la imagen procede de Docker Hub
+4. existe una IPv4 pública asignada
+```
+
+En este momento la **publicación del contenedor en OCI ha finalizado**. La siguiente fase se dedica únicamente a validar el funcionamiento de EcoRed.
 
 ---
 
+# Fase 4. Validar y operar EcoRed en OCI
 
-## Paso 3.5. Configurar la política de reinicio
-
-En las opciones avanzadas del Container Instance configure:
-
-```text
-Container restart policy: Always
-```
-
-### Paso a paso
-
-<img width="671" height="624" alt="image" src="https://github.com/user-attachments/assets/8018eb62-e036-4781-bb2c-710e5be16042" />
-<img width="815" height="393" alt="image" src="https://github.com/user-attachments/assets/1f934967-20af-4b69-ac5c-7689ac97e7b7" />
-<img width="1120" height="528" alt="image" src="https://github.com/user-attachments/assets/6dc1a414-9c91-4547-91e5-9a1231be69ae" />
-
-<img width="733" height="623" alt="image" src="https://github.com/user-attachments/assets/962d60ee-3f8a-4590-9875-fbe9beef4098" />
-
-<img width="858" height="636" alt="image" src="https://github.com/user-attachments/assets/a9688463-d4c5-429c-9ef9-2423a67dd3e4" />
-<img width="783" height="578" alt="image" src="https://github.com/user-attachments/assets/89b92790-723c-49ab-9d99-d93c3af43c8a" />
-<img width="885" height="678" alt="image" src="https://github.com/user-attachments/assets/d85fc1f8-20d7-43cb-8fc7-41e0b3c56271" />
+Esta fase comienza después de terminar el asistente y publicar `ecored-ci`. Utilice la `PUBLIC_IP` registrada al final de la Fase 3.
 
 
-
-
-
-
-
-Antes de continuar confirme:
-
-```text
-Container Instance: ecored-ci
-Compartment: ecored-dev
-VCN: ecored-vcn
-Subnet: ecored-public-subnet
-Public IPv4: Yes
-Restart policy: Always
-```
-
----
-
-# Fase 5. Validar y operar EcoRed en OCI
-
-## Paso 5.1. Probar el health endpoint
+## Paso 4.1. Probar el health endpoint
 
 Abra:
 
@@ -933,7 +1462,7 @@ Resultado esperado:
 {"status":"ok"}
 ```
 
-## Paso 5.2. Probar el frontend
+## Paso 4.2. Probar el frontend
 
 Abra:
 
@@ -943,7 +1472,7 @@ http://<PUBLIC_IP>:10000
 
 Debe cargar la interfaz de EcoRed.
 
-## Paso 5.3. Consultar logs desde OCI
+## Paso 4.3. Consultar logs desde OCI
 
 Abra:
 
@@ -958,7 +1487,7 @@ Container Instances
 
 Use los logs para verificar el arranque de Nginx, Gunicorn y Django y para diagnosticar errores de configuración.
 
-## Paso 5.4. Ejecutar diagnóstico mínimo
+## Paso 4.4. Ejecutar diagnóstico mínimo
 
 Si la Container Instance está `Active` pero la aplicación no responde, revise en este orden:
 
@@ -972,7 +1501,7 @@ Si la Container Instance está `Active` pero la aplicación no responde, revise 
 7. conexión con MongoDB Atlas y Firebase
 ```
 
-## Paso 5.5. Probar independencia del computador local
+## Paso 4.5. Probar independencia del computador local
 
 1. Compruebe que EcoRed responde desde OCI.
 2. Detenga Docker Desktop o apague el computador utilizado para construir la imagen.
@@ -984,7 +1513,7 @@ http://<PUBLIC_IP>:10000
 
 EcoRed debe continuar ejecutándose en OCI.
 
-## Paso 5.6. Probar Restart
+## Paso 4.6. Probar Restart
 
 Abra:
 
@@ -1001,7 +1530,7 @@ Espere nuevamente `State: Active` y pruebe:
 http://<PUBLIC_IP>:10000/api/health/
 ```
 
-## Paso 5.7. Probar Stop y Start
+## Paso 4.7. Probar Stop y Start
 
 Detenga la instancia:
 
