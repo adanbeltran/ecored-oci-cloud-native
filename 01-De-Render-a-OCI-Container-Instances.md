@@ -128,6 +128,8 @@ Todos los recursos del taller deben crearse en `ecored-dev`.
 <img width="1810" height="804" alt="Creación de compartment" src="https://github.com/user-attachments/assets/69d6f155-9ce9-4887-809a-10f2159b4291" />
 
 <img width="600" height="430" alt="Datos del compartment" src="https://github.com/user-attachments/assets/a74118e3-6267-47d3-bf07-a34819935e77" />
+<img width="1138" height="254" alt="image" src="https://github.com/user-attachments/assets/2cc1993f-79c7-4655-b21c-9b5ab964c4c5" />
+
 
 📘 [Ampliar: por qué separar EcoRed en un compartment](#d-1-3)
 
@@ -320,11 +322,13 @@ Guarde la regla y verifique que **esa misma Route Table** muestre:
 0.0.0.0/0 → ecored-igw
 ```
 
-### Evidencia de la corrección
+### Imagen
+<img width="886" height="271" alt="image" src="https://github.com/user-attachments/assets/620c02cf-9686-42a3-b03a-cec8c5d8596f" />
 
-<img src="assets/capturas-pdf/page-07.png" alt="Página 7 completa del PDF: corrección de la ruta 0.0.0.0/0 hacia ecored-igw y resultado Active" width="100%" />
+<img width="886" height="419" alt="image" src="https://github.com/user-attachments/assets/b2020b19-748c-46e1-a6a7-34381ff16d7e" />
 
-📘 [Ampliar: el error real encontrado en la Route Table y por qué falló el `image pull`](#d-2-4)
+
+📘 [Ampliar: el error encontrado en la Route Table y por qué falló el `image pull`](#d-2-4)
 
 ---
 
