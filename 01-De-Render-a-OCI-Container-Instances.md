@@ -318,9 +318,9 @@ Guarde la regla y verifique que **esa misma Route Table** muestre:
 0.0.0.0/0 → ecored-igw
 ```
 
-### Imagen
+### Evidencia de la corrección
 
-![Regla correcta en la Route Table](assets/capturas/p2-04-route-rule-correct.png)
+<img src="assets/capturas-pdf/page-07.png" alt="Página 7 completa del PDF: corrección de la ruta 0.0.0.0/0 hacia ecored-igw y resultado Active" width="100%" />
 
 📘 [Ampliar: el error real encontrado en la Route Table y por qué falló el `image pull`](#d-2-4)
 
@@ -381,9 +381,9 @@ Security List Egress 0.0.0.0/0           ✓
 Internet Gateway: ecored-igw             ✓
 ```
 
-### Imagen
+### Evidencia del caso real
 
-![Ejemplo de Route Table sin regla: configuración que provoca el fallo](assets/capturas/diag-route-table-empty.png)
+<img src="assets/capturas-pdf/page-06.png" alt="Página 6 completa del PDF: creación en curso y Route Table asociada sin regla" width="100%" />
 
 📘 [Ampliar: lista de comprobación de red antes del despliegue](#d-2-6)
 
@@ -446,10 +446,6 @@ Compartment: ecored-dev
 → Create container instance
 ```
 
-### Imagen
-
-![Inicio del asistente](assets/capturas/p3-02-basic-information.png)
-
 📘 [Ampliar: Container Instance vs. máquina virtual](#d-3-1)
 
 ---
@@ -470,9 +466,9 @@ Container restart policy: Always
 
 Mantenga la shape compatible con la imagen `linux/amd64`.
 
-### Imagen
+### Imagen del procedimiento
 
-![Basic information](assets/capturas/p3-02-basic-information.png)
+<img src="assets/capturas-pdf/page-01.png" alt="Página 1 completa del PDF: Basic information, shape y Containers Behavior" width="100%" />
 
 📘 [Ampliar: shape, OCPU, memoria, AD y restart policy](#d-3-2)
 
@@ -498,9 +494,9 @@ Network Security / NSG: Off
 DNS record: Assign a private DNS record
 ```
 
-### Imagen
+### Imagen del procedimiento
 
-![Networking de Container Instances](assets/capturas/p3-03-networking.png)
+<img src="assets/capturas-pdf/page-02.png" alt="Página 2 completa del PDF: VCN, subnet, IPv4 pública, Network Security y DNS" width="100%" />
 
 📘 [Ampliar: VNIC, IPv4 privada, IPv4 pública y por qué no aparece una opción “Security List”](#d-3-3)
 
@@ -518,10 +514,6 @@ No items to display
 ```
 
 Seleccione **Next**.
-
-### Imagen
-
-![Storage sin elementos](assets/capturas/p3-04-storage.png)
 
 📘 [Ampliar: por qué EcoRed no requiere volumen persistente en este taller](#d-3-4)
 
@@ -541,10 +533,6 @@ Configure:
 ```text
 Name: ecored
 ```
-
-### Imagen
-
-![Agregar contenedor](assets/capturas/p3-11-container-added.png)
 
 📘 [Ampliar: diferencia entre Container Instance y Container](#d-3-5)
 
@@ -574,10 +562,6 @@ La referencia final corresponde a:
 docker.io/TU_USUARIO/ecored-circular:v1.0
 ```
 
-### Imagen
-
-![Imagen desde Docker Hub](assets/capturas/p3-06-external-registry.png)
-
 📘 [Ampliar: cómo OCI obtiene la misma imagen que ya funcionó en Render](#d-3-6)
 
 ---
@@ -605,9 +589,9 @@ PORT=8000
 VITE_*
 ```
 
-### Imagen
+### Imagen del procedimiento
 
-![Nombres de variables de entorno](assets/capturas/p3-07-environment-variable-names.png)
+<img src="assets/capturas-pdf/page-03.png" alt="Página 3 completa del PDF: External registry y Environmental variables" width="100%" />
 
 📘 [Ampliar: diferencias entre el `.env` local, Render y OCI](#d-3-7)
 
@@ -638,10 +622,6 @@ FIREBASE_CREDENTIALS_PATH=/etc/secrets/firebase-service-account.json
 
 No incluya valores secretos en capturas ni entregables.
 
-### Imagen
-
-![Variables configuradas sin mostrar secretos](assets/capturas/p3-07-environment-variable-names.png)
-
 📘 [Ampliar: equivalencia con Secret File de Render y manejo didáctico de Firebase](#d-3-8)
 
 ---
@@ -671,10 +651,6 @@ En **Command arguments**, configure dos argumentos:
 mkdir -p /etc/secrets && printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > /etc/secrets/firebase-service-account.json && chmod 600 /etc/secrets/firebase-service-account.json && exec /start.sh
 ```
 
-### Imagen
-
-![Startup options](assets/capturas/p3-09-startup-options.png)
-
 📘 [Ampliar: qué hace `/bin/sh -c`, por qué se crea el archivo y por qué termina en `/start.sh`](#d-3-9)
 
 ---
@@ -693,9 +669,9 @@ Drop capabilities: sin cambios
 Add capabilities: sin cambios
 ```
 
-### Imagen
+### Imagen del procedimiento
 
-![Security del contenedor](assets/capturas/p3-10-container-security.png)
+<img src="assets/capturas-pdf/page-04.png" alt="Página 4 completa del PDF: Startup options, Security y contenedor agregado" width="100%" />
 
 📘 [Ampliar: por qué la imagen actual necesita escribir `/etc/secrets` durante el arranque](#d-3-10)
 
@@ -710,10 +686,6 @@ Verifique que la sección **Containers** muestre:
 Name: ecored
 Image URL: docker.io/TU_USUARIO/ecored-circular:v1.0
 ```
-
-### Imagen
-
-![Contenedor agregado](assets/capturas/p3-11-container-added.png)
 
 📘 [Ampliar: qué información queda almacenada en la definición del contenedor](#d-3-11)
 
@@ -739,9 +711,9 @@ Image: docker.io/TU_USUARIO/ecored-circular:v1.0
 
 Confirme que existen las variables privadas, pero no muestre sus valores.
 
-### Imagen
+### Imagen del procedimiento
 
-![Review Details](assets/capturas/p3-12-review-details.png)
+<img src="assets/capturas-pdf/page-05.png" alt="Página 5 completa del PDF: Review Details de la Container Instance" width="100%" />
 
 📘 [Ampliar: qué validar antes de presionar Create](#d-3-12)
 
@@ -767,10 +739,6 @@ crea la VNIC
 → ejecuta Startup options
 ```
 
-### Imagen
-
-![Estado Creating](assets/capturas/p3-14-creating-state.png)
-
 📘 [Ampliar: qué ocurre realmente durante Create y cómo interpretar un Work Request fallido](#d-3-13)
 
 ---
@@ -792,12 +760,6 @@ Abra los detalles y registre:
 PUBLIC_IP=<IPv4 pública asignada>
 PRIVATE_IP=<IPv4 privada asignada>
 ```
-
-### Imagen
-
-![Container Instance Active](assets/capturas/p3-15-active-list.png)
-
-![VNIC e IPv4 pública](assets/capturas/p3-16-active-details.png)
 
 📘 [Ampliar: qué significan las IP pública y privada de la VNIC](#d-3-14)
 
@@ -850,9 +812,9 @@ http://<PUBLIC_IP>:10000/api/health/
 
 Debe obtener una respuesta HTTP del backend.
 
-### Imagen
+### Imagen del procedimiento
 
-![API de EcoRed en OCI](assets/capturas/p4-02-api-root.png)
+<img src="assets/capturas-pdf/page-08.png" alt="Página 8 completa del PDF: respuesta de Django REST Framework desde OCI" width="100%" />
 
 📘 [Ampliar: por qué `/api/` termina en Django aunque el puerto público sea `10000`](#d-4-1)
 
@@ -868,10 +830,6 @@ http://<PUBLIC_IP>:10000
 ```
 
 Debe cargar la interfaz de EcoRed.
-
-### Imagen
-
-![Login de EcoRed](assets/capturas/p4-03-login.png)
 
 📘 [Ampliar: cómo Nginx entrega React desde el mismo contenedor](#d-4-2)
 
@@ -904,11 +862,9 @@ http://168.138.134.136
 
 Utilice la IPv4 real asignada a su propia Container Instance.
 
-### Imagen
+### Imagen del procedimiento
 
-![Dominio no autorizado](assets/capturas/p4-04-firebase-domain-error.png)
-
-![IPv4 agregada a Authorized domains](assets/capturas/p4-05-firebase-authorized-domain.png)
+<img src="assets/capturas-pdf/page-09.png" alt="Página 9 completa del PDF: login y error de dominio no autorizado para OAuth" width="100%" />
 
 📘 [Ampliar: por qué Firebase valida el hostname y no el puerto](#d-4-3)
 
@@ -921,9 +877,9 @@ Utilice la IPv4 real asignada a su propia Container Instance.
 2. Pruebe **Ingresar con Google**.
 3. Acceda a una pantalla funcional, por ejemplo **Materiales**.
 
-### Imagen
+### Imagen del procedimiento
 
-![EcoRed funcionando después de autorizar el dominio](assets/capturas/p4-06-final-app.png)
+<img src="assets/capturas-pdf/page-10.png" alt="Página 10 completa del PDF: Firebase Authorized domains y EcoRed funcionando" width="100%" />
 
 📘 [Ampliar: flujo OAuth y relación con el futuro dominio HTTPS de EcoRed](#d-4-4)
 
@@ -961,10 +917,6 @@ A container's image could not be pulled due to inadequate network configuration.
 
 revise primero la Route Table asociada a la subnet.
 
-### Imagen
-
-![Route Table vacía que produjo el fallo de image pull](assets/capturas/diag-route-table-empty.png)
-
 📘 [Ampliar: diagnóstico ordenado de errores de red, imagen y aplicación](#d-4-5)
 
 ---
@@ -1001,261 +953,557 @@ Vuelva a probar:
 http://<PUBLIC_IP>:10000
 ```
 
-### Imagen
-
-![Container Instance Active](assets/capturas/p3-15-active-list.png)
-
 📘 [Ampliar: ciclo de vida de una Container Instance y persistencia de los datos](#d-4-6)
 
 ---
 
 <a id="fase-5-experimentación-guiada-entender-el-flujo-completo"></a>
-# Fase 5. Experimentación guiada: entender el flujo completo
+# Fase 5. Experimentación guiada: observar y demostrar el flujo completo
 
 ## Introducción
 
-Esta fase no agrega nuevos servicios. Utiliza la infraestructura ya creada para comprobar, mediante pequeñas pruebas, qué responsabilidad tiene cada componente y cómo una petición entra a OCI, llega a Nginx, pasa al backend y regresa al cliente.
+EcoRed ya está funcionando. En esta fase el estudiante no vuelve a desplegar la aplicación: utiliza la infraestructura existente y herramientas de diagnóstico de OCI para observar qué ocurre cuando una petición funciona o falla.
+
+Se trabajará con tres tipos de evidencia:
+
+```text
+Network Path Analyzer
+→ analiza la configuración lógica del camino; no envía tráfico real
+
+VCN Flow Logs
+→ registra tráfico real aceptado o rechazado en las VNIC de la subnet
+
+Container Logs + DevTools
+→ muestran el procesamiento dentro del contenedor y la respuesta HTTP vista por el cliente
+```
 
 ## Objetivo de la fase
 
-Relacionar evidencia observable con los conceptos de red, seguridad y ejecución de contenedores.
+Demostrar con evidencia el recorrido:
+
+```text
+Cliente
+→ Internet
+→ Internet Gateway
+→ Route Table
+→ Subnet
+→ Security List
+→ VNIC
+→ Container Instance
+→ Nginx
+→ Gunicorn
+→ Django
+→ respuesta al cliente
+```
+
+y diferenciar **routing**, **reglas de acceso**, **tráfico de red** y **procesamiento de aplicación**.
 
 ## Proceso de experimentación
 
 ```text
-Cliente
-  │
-  ▼
-Internet
-  │
-  ▼
-Internet Gateway
-  │
-  ▼
-IPv4 pública / VNIC
-  │
-  ▼
-Security List
-  │
-  ▼
-Container Instance
-  │
-  ▼
-Nginx :10000
-  ├── React
-  └── /api/ → Gunicorn :8000 → Django
-  │
-  ▼
-Respuesta
-  │
-  ▼
-Route Table → Internet Gateway → Cliente
+Inventario de la topología
+        ↓
+Network Path Analyzer
+        ↓
+VCN Flow Logs
+        ↓
+Tráfico permitido: ACCEPT
+        ↓
+Tráfico bloqueado: REJECT
+        ↓
+Container Logs
+        ↓
+DevTools
+        ↓
+Prueba de routing
+        ↓
+Preguntas de análisis
 ```
 
-📘 [Ampliar: modelo mental completo de entrada y salida](#d-f5)
+📘 [Ampliar: modelo mental completo de entrada, procesamiento y respuesta](#d-f5)
 
 ---
 
-<a id="paso-51-trazar-el-camino-desde-la-subnet-hasta-internet"></a>
-## Paso 5.1. Trazar el camino desde la subnet hasta Internet
+<a id="paso-51-registrar-la-topología-real"></a>
+## Paso 5.1. Registrar la topología real
 
-En OCI abra:
-
-```text
-ecored-public-subnet
-→ Details
-```
-
-Identifique:
+Desde `ecored-ci → Details` registre:
 
 ```text
-Route Table: Default Route Table for ecored-vcn
-Security List: Default Security List for ecored-vcn
-Subnet Access: Public Subnet
+PUBLIC_IP=
+PRIVATE_IP=
+VNIC_OCID=
 ```
 
-Después abra la Route Table y confirme:
+Desde `ecored-public-subnet → Details` registre:
 
 ```text
-0.0.0.0/0 → ecored-igw
+SUBNET_CIDR=
+SUBNET_OCID=
+ROUTE_TABLE=
+SECURITY_LIST=
 ```
 
-### Imagen
+Desde `ecored-vcn` registre:
 
-![Ruta hacia Internet](assets/capturas/p2-04-route-rule-correct.png)
+```text
+VCN_CIDR=
+INTERNET_GATEWAY=
+```
 
-📘 [Ampliar: por qué una subnet pública sin ruta sigue sin tener conectividad útil](#d-5-1)
+Complete:
+
+| Elemento | Valor observado | Función |
+|---|---|---|
+| VCN | | Red lógica general |
+| Subnet | | Segmento donde está la VNIC |
+| VNIC | | Interfaz de red de `ecored-ci` |
+| IPv4 privada | | Dirección dentro de la subnet |
+| IPv4 pública | | Dirección usada por el navegador |
+| Route Table | | Decide el siguiente salto |
+| Internet Gateway | | Conecta la VCN con Internet |
+| Security List | | Permite o rechaza tráfico |
+| TCP `10000` | | Entrada HTTP de Nginx |
+
+📘 [Ampliar: cómo se relacionan VCN, subnet, VNIC e IPv4](#d-5-1)
 
 ---
 
-<a id="paso-52-experimentar-con-la-regla-tcp-10000"></a>
-## Paso 5.2. Experimentar con la regla TCP `10000`
+<a id="paso-52-analizar-la-ruta-con-network-path-analyzer"></a>
+## Paso 5.2. Analizar la ruta con Network Path Analyzer
 
-1. Registre la regla actual de Ingress TCP `10000`.
-2. Elimine temporalmente **solo** esa regla.
-3. Intente abrir:
+Abra:
 
 ```text
-http://<PUBLIC_IP>:10000
+Networking
+→ Network Command Center
+→ Network Path Analyzer
+→ Create path analysis
 ```
 
-4. Compruebe que la aplicación deja de ser accesible desde Internet.
-5. Cree nuevamente la regla exactamente como estaba:
+Cree una prueba de salida:
 
 ```text
-Source: 0.0.0.0/0
+Name: ecored-vnic-to-internet
+Compartment: ecored-dev
 Protocol: TCP
-Destination Port: 10000
+
+Source:
+VNIC OCID
+<VNIC_OCID de ecored-ci>
+
+Destination:
+Enter IP address
+8.8.8.8
+
+Destination port:
+443
 ```
 
-6. Recargue EcoRed y confirme que vuelve a responder.
+Seleccione **Run analysis**.
 
-### Imagen
+Registre:
 
-<img width="1714" height="672" alt="Regla TCP 10000" src="https://github.com/user-attachments/assets/0d82dc98-89a3-47ff-afdc-729ce2b73db4" />
+```text
+Subnet:
+Route Table:
+Regla 0.0.0.0/0:
+Internet Gateway:
+Reglas de seguridad consideradas:
+Resultado:
+```
 
-📘 [Ampliar: diferencia entre “tener ruta” y “tener permiso”](#d-5-2)
+Network Path Analyzer examina configuración de routing y seguridad; no genera tráfico real.
+
+Si la consola permite definir el escenario **Internet → OCI**, cree además una prueba TCP hacia la VNIC de `ecored-ci` usando el puerto `10000` y registre qué componentes permiten el camino.
+
+📘 [Ampliar: Network Path Analyzer y diferencia frente a un log real](#d-5-2)
 
 ---
 
-<a id="paso-53-analizar-el-fallo-real-de-image-pull"></a>
-## Paso 5.3. Analizar el fallo real de `image pull`
+<a id="paso-53-activar-vcn-flow-logs"></a>
+## Paso 5.3. Activar VCN Flow Logs en la subnet
 
-Compare:
-
-```text
-Route Table asociada a la subnet SIN regla
-→ OCI no alcanza Docker Hub
-→ CREATE_CONTAINER_INSTANCE = Failed
-```
-
-con:
+Abra:
 
 ```text
-Route Table asociada a la subnet CON 0.0.0.0/0 → ecored-igw
-→ OCI alcanza Docker Hub
-→ descarga ecored-circular:v1.0
-→ State = Active
+Networking
+→ Network Command Center
+→ Flow logs
+→ Enable flow logs
 ```
 
-### Imagen
+Configure:
 
-![Route Table sin reglas](assets/capturas/diag-route-table-empty.png)
+```text
+Flow log name: ecored-flowlog
+Compartment: ecored-dev
+```
 
-![Regla corregida](assets/capturas/p2-04-route-rule-correct.png)
+Cree o seleccione un Log Group:
 
-📘 [Ampliar: causalidad entre subnet, Route Table, IGW y Docker Hub](#d-5-3)
+```text
+ecored-network-lab
+```
+
+Cree un Capture Filter:
+
+```text
+Name: ecored-capture
+Sampling rate: 100%
+Action: Include
+Protocol: TCP
+```
+
+En **Enablement points** seleccione:
+
+```text
+Type: Subnet
+VCN: ecored-vcn
+Subnet: ecored-public-subnet
+```
+
+Active el Flow Log.
+
+Los registros pueden consultarse desde:
+
+```text
+Networking
+→ Network Command Center
+→ Flow logs
+```
+
+o desde el servicio **Logging**.
+
+Localice estos campos:
+
+```text
+data.action
+data.sourceAddress
+data.sourcePort
+data.destinationAddress
+data.destinationPort
+data.protocolName
+oracle.vnicocid
+oracle.vnicsubnetocid
+data.packets
+```
+
+📘 [Ampliar: qué registran los VCN Flow Logs](#d-5-3)
 
 ---
 
-<a id="paso-54-observar-cómo-responde-nginx-por-dentro-del-contenedor"></a>
-## Paso 5.4. Observar cómo responde Nginx por dentro del contenedor
+<a id="paso-54-generar-tráfico-permitido-y-observar-accept"></a>
+## Paso 5.4. Generar tráfico permitido y observar `ACCEPT`
 
-Abra dos URLs:
+Con la regla TCP `10000` activa, abra varias veces:
 
 ```text
 http://<PUBLIC_IP>:10000/
 http://<PUBLIC_IP>:10000/api/
 ```
 
-Interprete el resultado:
+Consulte `ecored-flowlog`.
+
+Busque un registro asociado a la VNIC/subnet de EcoRed con:
 
 ```text
-/
-↓
-Nginx :10000
-↓
-archivos estáticos de React
+data.action=ACCEPT
+data.protocolName=TCP
+data.destinationPort=10000
 ```
 
-```text
-/api/
-↓
-Nginx :10000
-↓ reverse proxy
-Gunicorn 127.0.0.1:8000
-↓
-Django / DRF
-```
+Complete:
 
-### Imagen
+| Campo | Valor observado |
+|---|---|
+| `data.action` | |
+| `data.sourceAddress` | |
+| `data.destinationAddress` | |
+| `data.destinationPort` | |
+| `data.protocolName` | |
+| `oracle.vnicocid` | |
+| `oracle.vnicsubnetocid` | |
 
-![Respuesta del API](assets/capturas/p4-02-api-root.png)
+En tráfico que usa una IP pública, el Flow Log puede mostrar la IP privada correspondiente de la VNIC; utilice también los OCID para hacer la correlación.
 
-📘 [Ampliar: Nginx, reverse proxy, Gunicorn y Django dentro de la misma imagen](#d-5-4)
+📘 [Ampliar: cómo relacionar Flow Logs con VNIC y subnet](#d-5-4)
 
 ---
 
-<a id="paso-55-observar-la-petición-y-la-respuesta-con-devtools"></a>
-## Paso 5.5. Observar la petición y la respuesta con DevTools
+<a id="paso-55-bloquear-tcp-10000-y-observar-reject"></a>
+## Paso 5.5. Bloquear temporalmente TCP `10000` y observar `REJECT`
 
-1. Abra Chrome DevTools.
-2. Seleccione **Network**.
-3. Recargue EcoRed.
-4. Identifique peticiones hacia:
+Antes de modificar la Security List copie la regla actual:
+
+```text
+Source: 0.0.0.0/0
+Protocol: TCP
+Destination Port: 10000
+Description: EcoRed HTTP laboratorio
+```
+
+1. Elimine temporalmente **solo** la regla Ingress TCP `10000`.
+2. Mantenga sin cambios Route Table e Internet Gateway.
+3. Intente abrir:
+
+```text
+http://<PUBLIC_IP>:10000/api/
+```
+
+4. Registre el resultado del navegador.
+5. Consulte `ecored-flowlog`.
+6. Busque el intento bloqueado; el Flow Log debe permitir observar si el flujo fue marcado como:
+
+```text
+data.action=REJECT
+```
+
+7. Restaure inmediatamente la regla TCP `10000`.
+8. Repita la solicitud.
+9. Confirme que EcoRed vuelve a responder y que el tráfico permitido vuelve a aparecer como `ACCEPT`.
+
+Complete:
+
+| Estado | Ruta | IGW | TCP 10000 | Flow Log | Navegador |
+|---|---|---|---|---|---|
+| Inicial | Correcta | Disponible | Presente | | |
+| Bloqueado | Correcta | Disponible | Ausente | | |
+| Restaurado | Correcta | Disponible | Presente | | |
+
+📘 [Ampliar: diferencia entre ruta y permiso](#d-5-5)
+
+---
+
+<a id="paso-56-observar-container-logs"></a>
+## Paso 5.6. Observar Container Logs
+
+Abra:
+
+```text
+Container Instances
+→ ecored-ci
+→ Containers
+→ ecored
+→ Actions
+→ View logs
+```
+
+En otra pestaña genere:
 
 ```text
 http://<PUBLIC_IP>:10000/
-http://<PUBLIC_IP>:10000/api/...
+http://<PUBLIC_IP>:10000/api/
 ```
 
-5. Registre `Request URL`, `Status Code` y el recurso solicitado.
+La imagen construida en el taller anterior envía a la salida del contenedor:
 
-### Imagen
+```text
+Nginx access_log → stdout
+Nginx error_log  → stderr
+Gunicorn access log → stdout
+Gunicorn error log  → stderr
+```
 
-![Aplicación desplegada](assets/capturas/p4-06-final-app.png)
+Por ello, **View logs** permite observar evidencia del procesamiento interno.
 
-📘 [Ampliar: recorrido de la respuesta desde Django/Nginx hasta el navegador](#d-5-5)
+Interprete:
+
+```text
+GET /
+→ Nginx
+→ React
+```
+
+```text
+GET /api/
+→ Nginx :10000
+→ proxy_pass
+→ Gunicorn 127.0.0.1:8000
+→ Django/DRF
+```
+
+Complete:
+
+| Solicitud | Evidencia Nginx | Evidencia Gunicorn/Django | Código HTTP |
+|---|---|---|---|
+| `/` | | | |
+| `/api/` | | | |
+
+Cuando TCP `10000` está bloqueado y Flow Logs muestra `REJECT`, compare si esa misma solicitud llega o no a los Container Logs.
+
+📘 [Ampliar: Nginx → Gunicorn → Django dentro del contenedor](#d-5-6)
 
 ---
 
-<a id="paso-56-experimentar-con-firebase-authorized-domains"></a>
-## Paso 5.6. Experimentar con Firebase Authorized Domains
+<a id="paso-57-correlacionar-devtools-flow-logs-y-container-logs"></a>
+## Paso 5.7. Correlacionar DevTools, Flow Logs y Container Logs
 
-Use las evidencias obtenidas durante el despliegue:
-
-```text
-IPv4 no autorizada
-→ Firebase bloquea OAuth
-```
+Abra:
 
 ```text
-IPv4 agregada a Authorized domains
-→ Google Sign-In puede ejecutarse
+Chrome DevTools
+→ Network
 ```
 
-No es necesario volver a eliminar el dominio si la aplicación ya está funcionando; documente la relación causa-efecto.
+Recargue:
 
-### Imagen
+```text
+http://<PUBLIC_IP>:10000/api/
+```
 
-![Error por dominio no autorizado](assets/capturas/p4-04-firebase-domain-error.png)
+Registre:
 
-![Dominio autorizado](assets/capturas/p4-05-firebase-authorized-domain.png)
+```text
+Request URL:
+Request Method:
+Status Code:
+Remote Address:
+Tiempo:
+```
 
-📘 [Ampliar: identidad de aplicación, dominio, OAuth y futura transición a HTTPS](#d-5-6)
+Relacione el mismo evento:
+
+```text
+DevTools
+→ qué pidió y recibió el navegador
+
+VCN Flow Logs
+→ si la red aceptó o rechazó el flujo
+
+Container Logs
+→ qué proceso atendió la solicitud
+```
+
+Complete:
+
+| Capa | Evidencia observada | ¿Qué demuestra? |
+|---|---|---|
+| DevTools | | |
+| VCN Flow Logs | | |
+| Container Logs | | |
+
+📘 [Ampliar: correlación entre cliente, red y aplicación](#d-5-7)
+
+---
+
+<a id="paso-58-experimentar-con-routing"></a>
+## Paso 5.8. Experimentar con routing usando Network Path Analyzer
+
+Registre primero:
+
+```text
+0.0.0.0/0 → ecored-igw
+```
+
+1. Ejecute `ecored-vnic-to-internet` y registre el resultado.
+2. Elimine temporalmente **solo** la regla `0.0.0.0/0 → ecored-igw`.
+3. No reinicie ni elimine `ecored-ci`.
+4. Ejecute nuevamente Network Path Analyzer.
+5. Compare el resultado.
+6. Restaure inmediatamente:
+
+```text
+0.0.0.0/0 → ecored-igw
+```
+
+7. Ejecute nuevamente el análisis y confirme que el camino se recupera.
+
+Complete:
+
+| Estado | Ruta `0.0.0.0/0` | Resultado NPA | Camino a Internet |
+|---|---|---|---|
+| Inicial | Presente | | |
+| Sin ruta | Ausente | | |
+| Restaurado | Presente | | |
+
+Este experimento reproduce la causa de un `image pull` fallido sin necesidad de volver a crear el contenedor.
+
+📘 [Ampliar: por qué Internet Gateway sin Route Table no proporciona conectividad](#d-5-8)
+
+---
+
+<a id="paso-59-restaurar-el-estado-final"></a>
+## Paso 5.9. Restaurar el estado final
+
+Antes de finalizar confirme:
+
+```text
+Route Table:
+0.0.0.0/0 → ecored-igw                 ✓
+
+Security List:
+Ingress TCP 10000                       ✓
+Egress 0.0.0.0/0                        ✓
+
+Container Instance:
+State = Active                          ✓
+
+EcoRed:
+http://<PUBLIC_IP>:10000                ✓
+```
+
+Desactive o elimine `ecored-flowlog` si no será utilizado después.
+
+📘 [Ampliar: estado final esperado después de la experimentación](#d-5-9)
 
 ---
 
 <a id="entregables"></a>
 # Entregables
 
+## A. Evidencias del despliegue
+
 - [ ] Tenancy y región identificadas.
 - [ ] Compartment `ecored-dev` activo.
-- [ ] VCN `ecored-vcn` con CIDR `10.20.0.0/16`.
-- [ ] Subnet pública `ecored-public-subnet` con CIDR `10.20.10.0/24`.
-- [ ] Internet Gateway `ecored-igw`.
-- [ ] Evidencia de que la **Route Table asociada a la subnet** contiene `0.0.0.0/0 → ecored-igw`.
-- [ ] Security List con Ingress TCP `10000` y Egress hacia `0.0.0.0/0`.
-- [ ] Container Instance `ecored-ci` en estado `Active`.
-- [ ] Contenedor `ecored` ejecutando `docker.io/TU_USUARIO/ecored-circular:v1.0`.
-- [ ] Variables de entorno configuradas sin exponer secretos.
+- [ ] VCN `ecored-vcn`.
+- [ ] Subnet `ecored-public-subnet`.
+- [ ] Route Table asociada a la subnet con `0.0.0.0/0 → ecored-igw`.
+- [ ] Security List con Ingress TCP `10000` y Egress `0.0.0.0/0`.
+- [ ] `ecored-ci` en estado `Active`.
 - [ ] IPv4 pública registrada.
-- [ ] API accesible desde `http://<PUBLIC_IP>:10000/api/`.
-- [ ] Frontend accesible desde `http://<PUBLIC_IP>:10000`.
-- [ ] IPv4 pública registrada en Firebase Authorized Domains.
-- [ ] Evidencia de autenticación y una función de negocio de EcoRed.
-- [ ] Evidencias de la Fase 5 de experimentación.
-- [ ] Explicación de máximo una página del flujo completo de entrada y respuesta.
+- [ ] `/api/` funcionando.
+- [ ] Frontend funcionando.
+- [ ] Firebase Authorized Domains configurado.
+- [ ] Autenticación o función de negocio validada.
+
+## B. Evidencias de la experimentación
+
+Entregue un informe en PDF que incluya:
+
+- [ ] Tabla de topología del Paso 5.1.
+- [ ] Resultado del Network Path Analyzer con routing correcto.
+- [ ] VCN Flow Log con `data.action=ACCEPT`.
+- [ ] VCN Flow Log con `data.action=REJECT`.
+- [ ] Evidencia de restauración de TCP `10000`.
+- [ ] Extractos no sensibles de Container Logs para `/` y `/api/`.
+- [ ] Registro de una petición en DevTools.
+- [ ] Comparación de Network Path Analyzer con y sin `0.0.0.0/0 → ecored-igw`.
+- [ ] Evidencia de restauración final de la Route Table.
+- [ ] Diagrama propio del flujo completo de entrada y respuesta.
+
+## C. Preguntas basadas en la experimentación
+
+1. ¿Qué diferencia práctica observó entre VCN, subnet y VNIC?
+2. ¿Qué recurso decide que tráfico destinado fuera de la VCN utilice `ecored-igw`?
+3. ¿Por qué crear un Internet Gateway no es suficiente si la Route Table asociada a la subnet no contiene `0.0.0.0/0 → ecored-igw`?
+4. ¿Qué diferencia observó entre Route Table y Security List?
+5. ¿Qué cambió en los VCN Flow Logs al retirar TCP `10000`?
+6. ¿Qué significaron `ACCEPT` y `REJECT` en sus registros?
+7. ¿Qué campo permitió relacionar un Flow Log con la VNIC de `ecored-ci`?
+8. ¿Qué campo permitió relacionarlo con `ecored-public-subnet`?
+9. Cuando el Flow Log mostró `REJECT`, ¿la petición apareció en Container Logs? Explique.
+10. Para `GET /`, ¿qué proceso respondió principalmente dentro del contenedor?
+11. Para `GET /api/`, explique el recorrido Nginx → Gunicorn → Django.
+12. ¿Por qué Gunicorn escucha en `127.0.0.1:8000` si el usuario accede por el puerto `10000`?
+13. ¿Qué evidencia aporta DevTools que no aporta un VCN Flow Log?
+14. ¿Qué evidencia aportan Container Logs que no aporta Network Path Analyzer?
+15. ¿Network Path Analyzer envía tráfico real? ¿Qué analiza?
+16. ¿Qué ocurrió al analizar la ruta sin `0.0.0.0/0 → ecored-igw`?
+17. ¿Por qué una Route Table incorrecta puede impedir que OCI descargue la imagen desde Docker Hub?
+18. Describa el flujo de entrada desde el navegador hasta Django.
+19. Describa el flujo de respuesta desde Django hasta el navegador.
+20. ¿Qué responsabilidades ocultaba Render que ahora se hicieron explícitas en OCI?
 
 ---
 
@@ -1708,111 +1956,148 @@ Fuente oficial:
 [↩ Volver al Paso 4.6](#paso-46-probar-restart-stop-y-start)
 
 <a id="d-f5"></a>
-## Fase 5 - Modelo mental completo de entrada y salida
+## Fase 5 - Modelo mental completo de entrada, procesamiento y evidencia
 
-### Entrada
+<a id="d-f5"></a>
 
-```text
-Navegador
-→ Internet
-→ IPv4 pública
-→ Internet Gateway
-→ VNIC de ecored-ci
-→ Security List permite TCP 10000
-→ Nginx
-```
-
-### Procesamiento interno
+La fase combina cuatro perspectivas:
 
 ```text
-Ruta /
-→ Nginx
-→ React
+Network Path Analyzer
+→ configuración lógica; no envía tráfico real
+
+VCN Flow Logs
+→ tráfico real en VNIC/subnet; ACCEPT o REJECT
+
+Container Logs
+→ stdout/stderr de Nginx y Gunicorn
+
+DevTools
+→ perspectiva HTTP del cliente
 ```
 
-```text
-Ruta /api/
-→ Nginx
-→ Gunicorn :8000
-→ Django
-→ MongoDB Atlas / Firebase cuando corresponde
-```
-
-### Respuesta
-
-```text
-Django/Gunicorn o React
-→ Nginx
-→ VNIC
-→ subnet
-→ ruta hacia Internet Gateway
-→ Internet
-→ navegador
-```
-
-[↩ Volver a Fase 5](#fase-5-experimentación-guiada-entender-el-flujo-completo)
+Ninguna de estas herramientas por sí sola explica todo el recorrido.
 
 <a id="d-5-1"></a>
-## Paso 5.1 - Subnet y ruta
+## Paso 5.1 - Topología real
 
-El objetivo no es memorizar nombres, sino comprobar que el recurso usa una subnet y que esa subnet usa una Route Table concreta. La ruta debe estar en **esa tabla**, no en otra con un nombre parecido.
+La VCN define el espacio lógico de red. La subnet subdivide ese espacio. La VNIC conecta `ecored-ci` a la subnet y tiene una IPv4 privada. La IPv4 pública permite que el cliente alcance la VNIC desde Internet.
 
-[↩ Volver al Paso 5.1](#paso-51-trazar-el-camino-desde-la-subnet-hasta-internet)
+[Volver al Paso 5.1](#paso-51-registrar-la-topología-real)
 
 <a id="d-5-2"></a>
-## Paso 5.2 - Ruta vs. permiso
+## Paso 5.2 - Network Path Analyzer
 
-La Route Table puede estar correcta y, aun así, la aplicación ser inaccesible si TCP `10000` no está permitido. El experimento demuestra la separación de responsabilidades:
+Network Path Analyzer examina routing y seguridad y determina si existe un camino lógico. Oracle indica que no envía tráfico real. Puede analizar escenarios OCI↔OCI, OCI↔Internet y otros soportados.
 
-```text
-Route Table = camino
-Security List = permiso
-```
-
-[↩ Volver al Paso 5.2](#paso-52-experimentar-con-la-regla-tcp-10000)
+[Volver al Paso 5.2](#paso-52-analizar-la-ruta-con-network-path-analyzer)
 
 <a id="d-5-3"></a>
-## Paso 5.3 - Causalidad del image pull
+## Paso 5.3 - VCN Flow Logs
 
-La descarga de imagen ocurre **antes de ejecutar el contenedor**. Por ello un fallo de acceso a Docker Hub impide llegar a Startup options, Nginx, Django o Firebase.
+Los Flow Logs pueden activarse en VCN, subnet o VNIC. Los campos útiles para este taller incluyen:
 
 ```text
-Red incorrecta
-→ no image pull
-→ no container start
-→ no Nginx
-→ no Django
+data.action
+data.sourceAddress
+data.destinationAddress
+data.sourcePort
+data.destinationPort
+data.protocolName
+oracle.vnicocid
+oracle.vnicsubnetocid
 ```
 
-[↩ Volver al Paso 5.3](#paso-53-analizar-el-fallo-real-de-image-pull)
+`ACCEPT` significa que las reglas de seguridad aceptaron el flujo; `REJECT` significa que lo rechazaron.
+
+[Volver al Paso 5.3](#paso-53-activar-vcn-flow-logs)
 
 <a id="d-5-4"></a>
-## Paso 5.4 - Interior del contenedor
+## Paso 5.4 - Tráfico permitido
 
-Nginx cumple dos funciones en la imagen de EcoRed:
+Cuando TCP `10000` está permitido, se espera una cadena coherente:
 
-1. entregar el frontend React compilado;
-2. funcionar como reverse proxy para el API.
+```text
+DevTools: respuesta HTTP
+Flow Log: ACCEPT
+Container Logs: petición recibida
+```
 
-Gunicorn no se expone directamente a Internet. Escucha internamente en `127.0.0.1:8000`, mientras Nginx es el punto de entrada en `10000`.
+Los Flow Logs no muestran el contenido HTTP; registran metadatos de red.
 
-Esta separación explica por qué no debe abrirse el puerto `8000` en la Security List.
-
-[↩ Volver al Paso 5.4](#paso-54-observar-cómo-responde-nginx-por-dentro-del-contenedor)
+[Volver al Paso 5.4](#paso-54-generar-tráfico-permitido-y-observar-accept)
 
 <a id="d-5-5"></a>
-## Paso 5.5 - DevTools y respuesta
+## Paso 5.5 - Ruta frente a permiso
 
-DevTools permite observar la aplicación desde el punto de vista del cliente. Un `200` confirma que la petición completó el trayecto y regresó al navegador. Un timeout orienta a revisar networking; un `4xx/5xx` indica que la conexión llegó a una aplicación que respondió con error.
+Quitar TCP `10000` no elimina la Route Table ni el Internet Gateway. El camino lógico puede existir, pero la regla de seguridad rechaza la conexión:
 
-[↩ Volver al Paso 5.5](#paso-55-observar-la-petición-y-la-respuesta-con-devtools)
+```text
+routing ≠ autorización
+```
+
+[Volver al Paso 5.5](#paso-55-bloquear-tcp-10000-y-observar-reject)
 
 <a id="d-5-6"></a>
-## Paso 5.6 - Firebase como dependencia de identidad
+## Paso 5.6 - Logs del contenedor
 
-El error de Authorized Domains ocurre después de que la aplicación ya es alcanzable. Es un problema de identidad/OAuth, no de VCN ni de Nginx. Esta distinción ayuda a ubicar cada fallo en su capa correcta.
+El taller de Render configura:
 
-[↩ Volver al Paso 5.6](#paso-56-experimentar-con-firebase-authorized-domains)
+```text
+Nginx access_log /dev/stdout
+Nginx error_log /dev/stderr
+Gunicorn --access-logfile -
+Gunicorn --error-logfile -
+```
+
+por eso OCI puede recuperar esas salidas mediante **View logs**.
+
+[Volver al Paso 5.6](#paso-56-observar-container-logs)
+
+<a id="d-5-7"></a>
+## Paso 5.7 - Correlación de capas
+
+```text
+DevTools
+→ solicitud/respuesta del cliente
+
+Flow Logs
+→ decisión de red ACCEPT/REJECT
+
+Container Logs
+→ procesamiento por Nginx/Gunicorn/Django
+```
+
+Correlacionar tiempos y direcciones permite localizar la capa donde ocurre un problema.
+
+[Volver al Paso 5.7](#paso-57-correlacionar-devtools-flow-logs-y-container-logs)
+
+<a id="d-5-8"></a>
+## Paso 5.8 - Route Table e Internet Gateway
+
+El Internet Gateway habilita la posibilidad de conexión, pero la subnet necesita una regla en su Route Table:
+
+```text
+0.0.0.0/0 → ecored-igw
+```
+
+Sin esa ruta, Network Path Analyzer debe reflejar que la configuración ya no construye el mismo camino hacia Internet.
+
+[Volver al Paso 5.8](#paso-58-experimentar-con-routing)
+
+<a id="d-5-9"></a>
+## Paso 5.9 - Restauración
+
+Todo cambio experimental debe revertirse antes de cerrar el laboratorio:
+
+```text
+Route Table correcta
+Security List correcta
+Container Instance Active
+EcoRed accesible
+```
+
+[Volver al Paso 5.9](#paso-59-restaurar-el-estado-final)
 
 ---
 
