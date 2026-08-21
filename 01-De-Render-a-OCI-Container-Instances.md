@@ -503,8 +503,10 @@ DNS record: Assign a private DNS record
 ```
 
 ### Imagen del procedimiento
+<img width="886" height="593" alt="image" src="https://github.com/user-attachments/assets/015191db-a670-4cfe-9cd9-6f31d96db72c" />
+<img width="886" height="629" alt="image" src="https://github.com/user-attachments/assets/87849dc2-a7f7-4607-b911-e69e3e2ee36e" />
 
-<img src="assets/capturas-pdf/page-02.png" alt="Página 2 completa del PDF: VCN, subnet, IPv4 pública, Network Security y DNS" width="100%" />
+
 
 📘 [Ampliar: VNIC, IPv4 privada, IPv4 pública y por qué no aparece una opción “Security List”](#d-3-3)
 
@@ -569,6 +571,9 @@ La referencia final corresponde a:
 ```text
 docker.io/TU_USUARIO/ecored-circular:v1.0
 ```
+### Imagen del procedimiento
+<img width="886" height="496" alt="image" src="https://github.com/user-attachments/assets/2142657f-f7ff-47b1-80f7-a4e01e8fe7bc" />
+
 
 📘 [Ampliar: cómo OCI obtiene la misma imagen que ya funcionó en Render](#d-3-6)
 
@@ -598,8 +603,8 @@ VITE_*
 ```
 
 ### Imagen del procedimiento
+<img width="886" height="587" alt="image" src="https://github.com/user-attachments/assets/c53ef8c2-8bca-415a-8d26-47d1b2dcfaf0" />
 
-<img src="assets/capturas-pdf/page-03.png" alt="Página 3 completa del PDF: External registry y Environmental variables" width="100%" />
 
 📘 [Ampliar: diferencias entre el `.env` local, Render y OCI](#d-3-7)
 
@@ -659,6 +664,10 @@ En **Command arguments**, configure dos argumentos:
 mkdir -p /etc/secrets && printf '%s' "$FIREBASE_SERVICE_ACCOUNT_JSON" > /etc/secrets/firebase-service-account.json && chmod 600 /etc/secrets/firebase-service-account.json && exec /start.sh
 ```
 
+### Imagen del procedimiento
+<img width="886" height="337" alt="image" src="https://github.com/user-attachments/assets/4e7a4ae0-3299-4dc6-ba30-511e2d8edebd" />
+
+
 📘 [Ampliar: qué hace `/bin/sh -c`, por qué se crea el archivo y por qué termina en `/start.sh`](#d-3-9)
 
 ---
@@ -679,7 +688,8 @@ Add capabilities: sin cambios
 
 ### Imagen del procedimiento
 
-<img src="assets/capturas-pdf/page-04.png" alt="Página 4 completa del PDF: Startup options, Security y contenedor agregado" width="100%" />
+<img width="886" height="512" alt="image" src="https://github.com/user-attachments/assets/903c17db-f9dc-4338-ae41-fd6dff6be213" />
+
 
 📘 [Ampliar: por qué la imagen actual necesita escribir `/etc/secrets` durante el arranque](#d-3-10)
 
@@ -720,8 +730,14 @@ Image: docker.io/TU_USUARIO/ecored-circular:v1.0
 Confirme que existen las variables privadas, pero no muestre sus valores.
 
 ### Imagen del procedimiento
+<img width="886" height="685" alt="image" src="https://github.com/user-attachments/assets/b6b925b1-081a-46d1-aeb1-7b4bf6b69cdb" />
 
-<img src="assets/capturas-pdf/page-05.png" alt="Página 5 completa del PDF: Review Details de la Container Instance" width="100%" />
+<img width="886" height="693" alt="image" src="https://github.com/user-attachments/assets/ba9da149-48ef-4be6-8170-3817de1d9b62" />
+
+<img width="886" height="532" alt="image" src="https://github.com/user-attachments/assets/e7ef5cce-8744-4270-b889-93cd1c6313ba" />
+
+
+
 
 📘 [Ampliar: qué validar antes de presionar Create](#d-3-12)
 
@@ -746,6 +762,10 @@ crea la VNIC
 → crea el contenedor
 → ejecuta Startup options
 ```
+### Imagen del procedimiento
+
+<img width="886" height="521" alt="image" src="https://github.com/user-attachments/assets/cd1ab888-3b29-49a8-b439-3f1826a8f035" />
+
 
 📘 [Ampliar: qué ocurre realmente durante Create y cómo interpretar un Work Request fallido](#d-3-13)
 
@@ -768,6 +788,11 @@ Abra los detalles y registre:
 PUBLIC_IP=<IPv4 pública asignada>
 PRIVATE_IP=<IPv4 privada asignada>
 ```
+### Imagen del procedimiento
+
+<img width="886" height="269" alt="image" src="https://github.com/user-attachments/assets/331b2f16-966e-42d1-9ebe-b877a82d8ce7" />
+
+<img width="886" height="436" alt="image" src="https://github.com/user-attachments/assets/77186406-6913-4187-938c-524a88b2ca5a" />
 
 📘 [Ampliar: qué significan las IP pública y privada de la VNIC](#d-3-14)
 
