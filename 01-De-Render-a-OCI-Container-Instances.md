@@ -864,6 +864,15 @@ http://<PUBLIC_IP>:10000
 
 Debe cargar la interfaz de EcoRed.
 
+
+### Imagen del procedimiento
+
+<img width="886" height="592" alt="image" src="https://github.com/user-attachments/assets/ff860699-6a26-4ea1-8170-e11fd3a647d5" />
+
+<img width="886" height="429" alt="image" src="https://github.com/user-attachments/assets/1575c15e-1605-481c-89d2-458a2612bfb5" />
+
+
+
 📘 [Ampliar: cómo Nginx entrega React desde el mismo contenedor](#d-4-2)
 
 ---
@@ -897,7 +906,8 @@ Utilice la IPv4 real asignada a su propia Container Instance.
 
 ### Imagen del procedimiento
 
-<img src="assets/capturas-pdf/page-09.png" alt="Página 9 completa del PDF: login y error de dominio no autorizado para OAuth" width="100%" />
+<img width="886" height="561" alt="image" src="https://github.com/user-attachments/assets/bb86b61b-e08f-4905-b497-720013b9c07c" />
+
 
 📘 [Ampliar: por qué Firebase valida el hostname y no el puerto](#d-4-3)
 
@@ -912,7 +922,8 @@ Utilice la IPv4 real asignada a su propia Container Instance.
 
 ### Imagen del procedimiento
 
-<img src="assets/capturas-pdf/page-10.png" alt="Página 10 completa del PDF: Firebase Authorized domains y EcoRed funcionando" width="100%" />
+<img width="886" height="484" alt="image" src="https://github.com/user-attachments/assets/8a0b05dd-ad2e-49b6-9c97-c6b93c18007d" />
+
 
 📘 [Ampliar: flujo OAuth y relación con el futuro dominio HTTPS de EcoRed](#d-4-4)
 
@@ -932,6 +943,12 @@ Container Instances
 → View logs
 ```
 
+<img width="1697" height="276" alt="image" src="https://github.com/user-attachments/assets/13f012c1-35a2-4cf7-bab0-fb5736c79143" />
+
+<img width="1264" height="770" alt="image" src="https://github.com/user-attachments/assets/e31f328f-7ef4-416c-b8e6-10a04baaf9ec" />
+
+
+
 Para fallos de creación:
 
 ```text
@@ -941,6 +958,11 @@ Container Instances
 → CREATE_CONTAINER_INSTANCE
 → Messages / Errors
 ```
+
+<img width="1195" height="470" alt="image" src="https://github.com/user-attachments/assets/67c56968-0bdd-4be0-9ee3-6cef3e892e3e" />
+
+<img width="1164" height="674" alt="image" src="https://github.com/user-attachments/assets/96baaa84-cba3-4cee-8bd3-021d27ff0987" />
+
 
 Si aparece:
 
