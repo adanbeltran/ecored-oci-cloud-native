@@ -364,6 +364,11 @@ IP Protocol: All Protocols
 ```
 
 ### Imagen
+<img width="867" height="465" alt="image" src="https://github.com/user-attachments/assets/58d0fe0a-b12d-4cc1-941c-01bdfe9f676d" />
+<img width="691" height="464" alt="image" src="https://github.com/user-attachments/assets/c336b0a7-dd14-46ec-a070-97db84743b0b" />
+<img width="1053" height="430" alt="image" src="https://github.com/user-attachments/assets/87268191-6a64-4f88-8be6-5fd1e09b3f39" />
+
+
 
 <img width="1714" height="672" alt="Regla TCP 10000" src="https://github.com/user-attachments/assets/0d82dc98-89a3-47ff-afdc-729ce2b73db4" />
 
