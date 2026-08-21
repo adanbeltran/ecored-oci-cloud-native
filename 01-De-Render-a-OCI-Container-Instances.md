@@ -446,6 +446,10 @@ Compartment: ecored-dev
 → Create container instance
 ```
 
+### Imagen
+
+![Inicio del asistente](assets/capturas/p3-02-basic-information.png)
+
 📘 [Ampliar: Container Instance vs. máquina virtual](#d-3-1)
 
 ---
