@@ -392,9 +392,6 @@ Security List Egress 0.0.0.0/0           ✓
 Internet Gateway: ecored-igw             ✓
 ```
 
-### Evidencia del caso real
-
-<img src="assets/capturas-pdf/page-06.png" alt="Página 6 completa del PDF: creación en curso y Route Table asociada sin regla" width="100%" />
 
 📘 [Ampliar: lista de comprobación de red antes del despliegue](#d-2-6)
 
@@ -1686,8 +1683,6 @@ Fuente oficial: https://docs.oracle.com/en-us/iaas/Content/Network/Concepts/secu
 ## Paso 2.6 - Verificación previa
 
 Una Container Instance que usa Docker Hub depende de varios recursos externos a la propia definición del contenedor. Oracle exige que el registry sea alcanzable desde la subnet. Para un registry público, una opción soportada es una public subnet con Internet Gateway.
-
-La verificación previa reduce el diagnóstico por ensayo y error.
 
 Fuente oficial: https://docs.oracle.com/en-us/iaas/Content/container-instances/creating-a-container-instance.htm
 
