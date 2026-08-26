@@ -17,23 +17,36 @@
 
 ## Punto de partida y relación con la ruta
 
-Este taller forma parte de una secuencia de tres prácticas. Los estudiantes llegan después de construir y publicar la imagen de EcoRed y de comprobar que puede ejecutarse en OCI Container Instances. Ahora prepararán el artefacto y la red que serán utilizados posteriormente por OKE.
+Este taller es el segundo de la [ruta de aprendizaje **EcoRed Circular — Arquitectura Cloud Native en Oracle Cloud Infrastructure**](https://github.com/adanbeltran/ecored-oci-cloud-native/tree/main), compuesta por diez talleres encadenados. El resultado verificable de cada práctica se convierte en el insumo de la siguiente hasta construir la arquitectura Cloud Native integral de EcoRed en OCI.
+
+Los estudiantes llegan a este punto después de publicar la imagen de EcoRed y comprobar su ejecución en OCI Container Instances. En este taller preparan el registro de la imagen y el networking privado que utilizará OKE; posteriormente, la ruta continúa con resiliencia, microservicios, API Gateway, integración por eventos, persistencia distribuida, seguridad, observabilidad y automatización CI/CD.
 
 La secuencia pedagógica es:
 
 ```text
-Taller 1
-Construir y publicar la imagen en Docker Hub
-+ ejecutar EcoRed en OCI Container Instances
+Taller base
+Docker + Docker Hub + Render
                 │
                 ▼
-Taller 2
-Publicar la misma imagen en OCIR
-+ preparar networking privado
+Taller 1
+EcoRed en OCI Container Instances
+                │
+                ▼
+Taller 2 — este taller
+OCIR + networking privado
                 │
                 ▼
 Taller 3
-Crear OKE y ejecutar EcoRed mediante Pods
+EcoRed en OKE mediante Pods
+                │
+                ▼
+Talleres 4 al 10
+Resiliencia + microservicios + API Gateway
++ eventos + persistencia + seguridad y observabilidad
++ CI/CD e integración de la arquitectura destino
+                │
+                ▼
+Arquitectura Cloud Native integral de EcoRed en OCI
 ```
 
 ### Resultados previos requeridos
@@ -156,7 +169,7 @@ OCIR_ENDPOINT=bog.ocir.io
 
 > Si la práctica se realiza en una región suscrita diferente de la región de origen, utilice la clave de la región activa y no la que aparece en `Home region`. Los endpoints disponibles deben verificarse en la lista oficial de regiones de Container Registry.
 
-![Datos de la tenancy: región de origen y Object Storage Namespace](./images/taller-02/paso-1-1-tenancy-namespace.png)
+![Datos de la tenancy: región de origen y Object Storage Namespace](./taller-02/paso-1-1-tenancy-namespace.png)
 
 *Figura 1.1.1. La fila resaltada muestra el valor que debe copiarse como `TENANCY_NAMESPACE`. El namespace es diferente para cada estudiante.*
 
@@ -191,13 +204,13 @@ Developer Services
 → Create repository
 ```
 
-![Acceso a Container Registry en el compartimento ecored-dev](./images/taller-02/paso-1-2-container-registry.png)
+![Acceso a Container Registry en el compartimento ecored-dev](./taller-02/paso-1-2-container-registry.png)
 
 *Figura 1.2.1. Container Registry abierto en el compartimento `ecored-dev` antes de crear el primer repository.*
 
 Seleccione **Create repository**. OCI abrirá un formulario independiente:
 
-![Formulario inicial para crear un repository](./images/taller-02/paso-1-2-formulario-crear-repository.png)
+![Formulario inicial para crear un repository](./taller-02/paso-1-2-formulario-crear-repository.png)
 
 *Figura 1.2.2. Formulario de creación. Inicialmente aparece seleccionado el compartimento raíz; su identificador fue ocultado. Debe cambiarse antes de crear el repository.*
 
@@ -212,7 +225,7 @@ Compartment: ecored-dev
 
 Las etiquetas son opcionales.
 
-![Formulario configurado con el compartimento y el nombre del repository](./images/taller-02/paso-1-2-formulario-configurado.png)
+![Formulario configurado con el compartimento y el nombre del repository](./taller-02/paso-1-2-formulario-configurado.png)
 
 *Figura 1.2.3. Formulario configurado con `ecored-dev` y `ecored/ecored-circular`.*
 
@@ -224,13 +237,13 @@ Después de crear el repository:
 2. Mantenga seleccionado el compartimento `ecored-dev`.
 3. Confirme que `ecored/ecored-circular` aparezca con acceso **Private**.
 
-![Repository creado con acceso privado](./images/taller-02/paso-1-2-repository-creado-private.png)
+![Repository creado con acceso privado](./taller-02/paso-1-2-repository-creado-private.png)
 
 *Figura 1.2.4. Repository `ecored/ecored-circular` creado en `ecored-dev` con acceso `Private`.*
 
 En la cuenta de laboratorio verificada, el campo **Access** de la pestaña **Details** es informativo y no ofrece una opción para modificarlo. No se requiere ninguna acción adicional.
 
-![Detalles del repository con los datos de identidad redactados](./images/taller-02/paso-1-2-repository-detalles-redactado.png)
+![Detalles del repository con los datos de identidad redactados](./taller-02/paso-1-2-repository-detalles-redactado.png)
 
 *Figura 1.2.5. Detalles del repository. El OCID y el usuario fueron ocultados; se conservan el compartimento, el acceso, el namespace y el estado vacío necesarios para la verificación.*
 
@@ -252,7 +265,7 @@ Access: Private
 
 En OCI Console:
 
-![Menú de perfil con los datos de identidad redactados](./images/taller-02/paso-1-3-menu-perfil-redactado.png)
+![Menú de perfil con los datos de identidad redactados](./taller-02/paso-1-3-menu-perfil-redactado.png)
 
 *Figura 1.3.1. Menú de perfil. El correo y el identificador de la tenancy fueron ocultados por seguridad.*
 
@@ -264,7 +277,7 @@ Profile
 → Generate token
 ```
 
-![Pestaña Tokens and keys con la identidad y el fingerprint redactados](./images/taller-02/paso-1-3-tokens-and-keys-redactado.png)
+![Pestaña Tokens and keys con la identidad y el fingerprint redactados](./taller-02/paso-1-3-tokens-and-keys-redactado.png)
 
 *Figura 1.3.2. Sección `Auth tokens` dentro de `Tokens and keys`. El nombre personal y el fingerprint de la API key fueron ocultados.*
 
@@ -276,13 +289,13 @@ Descripción sugerida:
 Docker CLI EcoRed
 ```
 
-![Formulario para generar el Auth Token](./images/taller-02/paso-1-3-generar-token.png)
+![Formulario para generar el Auth Token](./taller-02/paso-1-3-generar-token.png)
 
 *Figura 1.3.3. Descripción asignada al Auth Token utilizado por Docker CLI.*
 
 Genere el token. OCI lo mostrará una sola vez. Utilice el menú de la derecha para copiarlo y guárdelo temporalmente en un lugar seguro.
 
-![Confirmación de generación con el valor del token oculto](./images/taller-02/paso-1-3-token-generado-oculto.png)
+![Confirmación de generación con el valor del token oculto](./taller-02/paso-1-3-token-generado-oculto.png)
 
 *Figura 1.3.4. Confirmación de generación. El valor del token está oculto deliberadamente y nunca debe aparecer en una evidencia.*
 
@@ -290,7 +303,7 @@ Genere el token. OCI lo mostrará una sola vez. Utilice el menú de la derecha p
 
 Vuelva a la sección **Auth tokens** y confirme que la descripción registrada aparece en la lista. La consola no volverá a mostrar el valor del token.
 
-![Auth Token creado y fingerprint de la API key redactado](./images/taller-02/paso-1-3-auth-token-creado-redactado.png)
+![Auth Token creado y fingerprint de la API key redactado](./taller-02/paso-1-3-auth-token-creado-redactado.png)
 
 *Figura 1.3.5. El Auth Token `Docker CLI EcoRed` aparece registrado. El fingerprint de la API key fue ocultado porque no es necesario para esta práctica.*
 
@@ -354,7 +367,7 @@ Antes de continuar, compruebe:
 Login Succeeded
 ```
 
-![Inicio de sesión exitoso con el nombre de usuario redactado](./images/taller-02/paso-1-4-login-succeeded-redactado.png)
+![Inicio de sesión exitoso con el nombre de usuario redactado](./taller-02/paso-1-4-login-succeeded-redactado.png)
 
 *Figura 1.4.1. Docker autenticado correctamente contra `gru.ocir.io`. El nombre de usuario fue cubierto con un recuadro opaco.*
 
@@ -378,7 +391,7 @@ Si la imagen ya no está disponible localmente, recupérela desde Docker Hub sin
 docker pull adanbeltran/ecored-circular:v1.0
 ```
 
-![Descarga exitosa de la imagen desde Docker Hub](./images/taller-02/paso-1-5-pull-docker-hub.png)
+![Descarga exitosa de la imagen desde Docker Hub](./taller-02/paso-1-5-pull-docker-hub.png)
 
 *Figura 1.5.1. Descarga de `adanbeltran/ecored-circular:v1.0`. El estado final confirma que las capas quedaron disponibles en Docker Desktop.*
 
@@ -433,7 +446,7 @@ Comando utilizado en la ejecución de referencia:
 docker push gru.ocir.io/gr8mdvskiowi/ecored/ecored-circular:v1.0
 ```
 
-![Publicación exitosa de la imagen en OCIR](./images/taller-02/paso-1-6-push-exitoso.png)
+![Publicación exitosa de la imagen en OCIR](./taller-02/paso-1-6-push-exitoso.png)
 
 *Figura 1.6.1. Las capas fueron publicadas en OCIR. La última línea muestra el tag `v1.0`, el digest y el tamaño del manifiesto.*
 
@@ -443,13 +456,13 @@ En OCI Console:
 
 1. Abra **Developer Services → Containers & Artifacts → Container Registry**.
 
-![Ruta de navegación hacia Container Registry](./images/taller-02/paso-1-6-navegar-container-registry.png)
+![Ruta de navegación hacia Container Registry](./taller-02/paso-1-6-navegar-container-registry.png)
 
 *Figura 1.6.2. Acceso a `Container Registry` desde el menú de Developer Services.*
 
 2. Seleccione el compartimento `ecored-dev` y abra el repository `ecored/ecored-circular`.
 
-![Repository privado disponible en Container Registry](./images/taller-02/paso-1-6-seleccionar-repository.png)
+![Repository privado disponible en Container Registry](./taller-02/paso-1-6-seleccionar-repository.png)
 
 *Figura 1.6.3. Repository privado `ecored/ecored-circular` disponible en el compartimento `ecored-dev`.*
 
@@ -459,7 +472,7 @@ En OCI Console:
 v1.0
 ```
 
-![Tag v1.0 publicado en Image versions](./images/taller-02/paso-1-6-image-version-v1.png)
+![Tag v1.0 publicado en Image versions](./taller-02/paso-1-6-image-version-v1.png)
 
 *Figura 1.6.4. La versión `ecored/ecored-circular:v1.0` confirma que la imagen quedó almacenada en OCIR. La captura fue recortada para conservar únicamente la evidencia requerida.*
 
@@ -526,7 +539,7 @@ Pestaña Gateways
 
 > En la interfaz actual de OCI, `NAT Gateways` no aparece como opción independiente en el menú principal de Networking. Primero debe abrir la VCN y seleccionar la pestaña **Gateways**.
 
-![Sección NAT Gateways dentro de la pestaña Gateways](./images/taller-02/paso-2-1-gateways-nat-vacio.png)
+![Sección NAT Gateways dentro de la pestaña Gateways](./taller-02/paso-2-1-gateways-nat-vacio.png)
 
 *Figura 2.1.1. La pestaña `Gateways` agrupa Internet Gateways, NAT Gateways y Service Gateways asociados a `ecored-vcn`.*
 
@@ -539,7 +552,7 @@ Public IP address: Ephemeral Public IP Address
 Route Table Association: sin seleccionar
 ```
 
-![Formulario de creación del NAT Gateway](./images/taller-02/paso-2-1-crear-nat-gateway.png)
+![Formulario de creación del NAT Gateway](./taller-02/paso-2-1-crear-nat-gateway.png)
 
 *Figura 2.1.2. Configuración de `ecored-nat` con una dirección pública efímera. La asociación avanzada de Route Table se deja vacía porque la ruta de la subnet privada se configurará posteriormente.*
 
@@ -551,7 +564,7 @@ Una dirección efímera es suficiente para el taller: OCI la mantiene mientras e
 ecored-nat → Available
 ```
 
-![NAT Gateway disponible con la IP pública redactada](./images/taller-02/paso-2-1-nat-available-ip-redactada.png)
+![NAT Gateway disponible con la IP pública redactada](./taller-02/paso-2-1-nat-available-ip-redactada.png)
 
 *Figura 2.1.3. `ecored-nat` en estado `Available`. La dirección IPv4 pública fue cubierta porque no es necesaria para reproducir la práctica.*
 
@@ -578,7 +591,7 @@ Service: All GRU Services in Oracle Services Network
 Route Table Association: sin seleccionar
 ```
 
-![Formulario de creación del Service Gateway](./images/taller-02/paso-2-2-crear-service-gateway.png)
+![Formulario de creación del Service Gateway](./taller-02/paso-2-2-crear-service-gateway.png)
 
 *Figura 2.2.1. Configuración de `ecored-sgw` para acceder a todos los servicios regionales disponibles mediante Oracle Services Network. La asociación avanzada de Route Table se deja vacía.*
 
@@ -592,7 +605,7 @@ El Service Gateway no reemplaza al NAT Gateway: `ecored-sgw` proporciona acceso 
 ecored-sgw → Available
 ```
 
-![Service Gateway disponible](./images/taller-02/paso-2-2-service-gateway-available.png)
+![Service Gateway disponible](./taller-02/paso-2-2-service-gateway-available.png)
 
 *Figura 2.2.2. `ecored-sgw` en estado `Available` y asociado a todos los servicios GRU de Oracle Services Network.*
 
@@ -635,7 +648,7 @@ All GRU Services in Oracle Services Network
 
 La tabla debe mostrar las dos reglas estáticas y **no utilizar `ecored-igw` como ruta por defecto**.
 
-![Route Rules completas de la tabla privada](./images/taller-02/paso-2-3-route-rules-completas.png)
+![Route Rules completas de la tabla privada](./taller-02/paso-2-3-route-rules-completas.png)
 
 *Figura 2.3.1. `ecored-private-rt` contiene una ruta de salida a Internet mediante `ecored-nat` y una ruta privada hacia Oracle Services Network mediante `ecored-sgw`.*
 
@@ -661,7 +674,7 @@ Subnet Type: Regional
 IPv4 CIDR Block: 10.20.20.0/24
 ```
 
-![Nombre, tipo y CIDR de la subnet privada](./images/taller-02/paso-2-4-subnet-nombre-cidr.png)
+![Nombre, tipo y CIDR de la subnet privada](./taller-02/paso-2-4-subnet-nombre-cidr.png)
 
 *Figura 2.4.1. Configuración regional de `ecored-workloads-private` con el bloque `10.20.20.0/24`, que no se superpone con `ecored-public-subnet` (`10.20.10.0/24`).*
 
@@ -675,7 +688,7 @@ DNS Label: ecoredworkloads
 DHCP Options: Default DHCP Options for ecored-vcn
 ```
 
-![Route Table, acceso privado y DNS de la subnet](./images/taller-02/paso-2-4-subnet-ruta-acceso-dns.png)
+![Route Table, acceso privado y DNS de la subnet](./taller-02/paso-2-4-subnet-ruta-acceso-dns.png)
 
 *Figura 2.4.2. La subnet utiliza `ecored-private-rt`, prohíbe direcciones IPv4 públicas y habilita nombres DNS internos.*
 
@@ -687,7 +700,7 @@ Resource logging: Disabled
 Tags: sin agregar
 ```
 
-![Security List y resource logging de la subnet](./images/taller-02/paso-2-4-subnet-security-list.png)
+![Security List y resource logging de la subnet](./taller-02/paso-2-4-subnet-security-list.png)
 
 *Figura 2.4.3. Asociación con la Security List predeterminada. El NSG específico para los workloads se crea en el paso siguiente.*
 
@@ -700,7 +713,7 @@ Access: Private
 Route Table: ecored-private-rt
 ```
 
-![Subnets pública y privada disponibles](./images/taller-02/paso-2-4-subnet-available.png)
+![Subnets pública y privada disponibles](./taller-02/paso-2-4-subnet-available.png)
 
 *Figura 2.4.4. `ecored-workloads-private` y `ecored-public-subnet` aparecen en estado `Available` con bloques CIDR independientes.*
 
@@ -718,7 +731,7 @@ Pestaña Security
 → Create Network Security Group
 ```
 
-![Sección Network Security Groups dentro de Security](./images/taller-02/paso-2-5-navegar-nsg.png)
+![Sección Network Security Groups dentro de Security](./taller-02/paso-2-5-navegar-nsg.png)
 
 *Figura 2.5.1. La pestaña `Security` separa las Security Lists de los Network Security Groups. En este paso se crea un NSG.*
 
@@ -733,7 +746,7 @@ Security Rules: ninguna
 
 > **Advertencia:** OCI puede mostrar inicialmente un bloque vacío en **Add Security Rules**. Pulse la `X` situada a la derecha del encabezado **Rule** para eliminarlo antes de crear el NSG. No complete esa regla con un origen amplio como `0.0.0.0/0`; las reglas se definirán cuando se conozcan los flujos requeridos por OKE.
 
-![Formulario del NSG sin reglas iniciales](./images/taller-02/paso-2-5-crear-nsg-sin-reglas.png)
+![Formulario del NSG sin reglas iniciales](./taller-02/paso-2-5-crear-nsg-sin-reglas.png)
 
 *Figura 2.5.2. `ecored-workloads-nsg` preparado sin reglas. La indicación `No items to display` confirma que el bloque inicial fue eliminado.*
 
@@ -745,7 +758,7 @@ Las reglas específicas necesarias para los componentes de OKE se definirán cua
 
 Existe el NSG y no contiene una regla pública indiscriminada hacia EcoRed.
 
-![Network Security Group disponible](./images/taller-02/paso-2-5-nsg-available.png)
+![Network Security Group disponible](./taller-02/paso-2-5-nsg-available.png)
 
 *Figura 2.5.3. `ecored-workloads-nsg` creado y en estado `Available`.*
 
@@ -772,7 +785,7 @@ Confirme que estén seleccionados la región y el compartment utilizados en el t
 
 > **Importante:** utilice el buscador para seleccionar la VCN. En la interfaz actual, pulsar el espacio vacío dentro del hexágono puede no seleccionar ningún recurso; si se selecciona un círculo como `IGW`, `NAT` o `SGW`, el panel mostrará los datos de ese gateway y no ofrecerá la opción **View VCN routing map**.
 
-![Selección de ecored-vcn y acceso al VCN routing map](images/taller-02/paso-2-6-buscar-vcn-mapa-redactada.png)
+![Selección de ecored-vcn y acceso al VCN routing map](./taller-02/paso-2-6-buscar-vcn-mapa-redactada.png)
 
 En el **Virtual cloud network routing map**, compruebe visualmente:
 
@@ -787,7 +800,7 @@ ecored-vcn
        └── ecored-sgw
 ```
 
-![Mapa de enrutamiento de ecored-vcn con sus dos subnets y gateways](images/taller-02/paso-2-6-vcn-routing-map.png)
+![Mapa de enrutamiento de ecored-vcn con sus dos subnets y gateways](./taller-02/paso-2-6-vcn-routing-map.png)
 
 La primera conexión representa la salida directa de la subnet pública mediante el Internet Gateway. Las otras dos muestran que la subnet privada utiliza el NAT Gateway para destinos de Internet y el Service Gateway para los servicios de OCI.
 
@@ -1042,7 +1055,7 @@ ecored-dev
 <a id="anexo-vision-general"></a>
 ## Visión general - ¿Por qué existe el Taller 2 si EcoRed ya funciona?
 
-El Taller 1 comprobó que la imagen de EcoRed puede construirse, publicarse en Docker Hub y ejecutarse en OCI Container Instances. El Taller 2 no reemplaza ese resultado: prepara el artefacto y la red para que OKE pueda utilizarlos en el Taller 3.
+Dentro de la ruta completa de diez talleres, el Taller 2 funciona como puente inmediato entre la ejecución inicial en OCI y la adopción de Kubernetes. El Taller 1 comprobó que la imagen de EcoRed puede construirse, publicarse en Docker Hub y ejecutarse en OCI Container Instances. El Taller 2 no reemplaza ese resultado: prepara el artefacto y la red para que OKE pueda utilizarlos en el Taller 3 y para que los talleres posteriores continúen evolucionando la arquitectura.
 
 Ejecutar un contenedor, almacenar una imagen y orquestar workloads son responsabilidades diferentes:
 
