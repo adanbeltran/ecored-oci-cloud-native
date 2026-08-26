@@ -15,6 +15,9 @@
 
 ---
 
+<img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/0af45633-844a-4208-83df-95d6f0c894e6" />
+
+
 ## Punto de partida y relación con la ruta
 
 Este taller es el segundo de la [ruta de aprendizaje **EcoRed Circular — Arquitectura Cloud Native en Oracle Cloud Infrastructure**](https://github.com/adanbeltran/ecored-oci-cloud-native/tree/main), compuesta por diez talleres encadenados. El resultado verificable de cada práctica se convierte en el insumo de la siguiente hasta construir la arquitectura Cloud Native integral de EcoRed en OCI.
