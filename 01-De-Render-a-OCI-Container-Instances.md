@@ -1,5 +1,8 @@
 # Taller 1. De Render a OCI Container Instances: despliegue inicial y experimentación de EcoRed
 
+
+
+
 [← Taller base: Docker Hub + Render](https://github.com/adanbeltran/Taller12factors/blob/main/docs/F-Contenizacion-Despliegue-web-en-Render.md) | [Índice de la ruta](README.md) | [Taller 2 →](02-OCIR-y-Networking-Privado.md)
 
 ## Agenda
