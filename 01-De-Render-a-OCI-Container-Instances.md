@@ -48,6 +48,8 @@ Compartment: ecored-dev
         ▼
 Recursos del Taller 1
 ```
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/1c6041d4-94b1-4116-98f5-ba18c0e9387a" />
+
 
 <img width="1536" height="1024" alt="Flujo general del Taller 1" src="https://github.com/user-attachments/assets/fde1e830-68d9-453d-aa42-9bfb76d37136" />
 <img width="1672" height="941" alt="image" src="https://github.com/user-attachments/assets/1f9647e8-41b1-498a-ab44-d2de70bf07d0" />
