@@ -1,4 +1,9 @@
 # Taller 2. Preparar EcoRed para Kubernetes: OCIR y networking privado
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/f0d75128-3afe-44e0-a165-42d9dda31021" />
+
+<img width="1024" height="559" alt="image" src="https://github.com/user-attachments/assets/440786d7-fe35-4787-8dda-22ea6c6a7067" />
+
+
 
 [← Taller 1](./01-De-Render-a-OCI-Container-Instances.md) | [Índice de la ruta](./README.md) | [Taller 3 →](./03-EcoRed-en-OKE-Kubernetes.md)
 
