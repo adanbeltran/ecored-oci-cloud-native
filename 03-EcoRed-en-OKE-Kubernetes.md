@@ -79,6 +79,21 @@ OKE Cluster
 - **ConfigMap:** configuración no sensible.
 - **Secret:** datos sensibles administrados por Kubernetes; en el Taller 9 se sustituirán los secretos más críticos por integración con servicios de secretos de OCI.
 
+<img width="1024" height="559" alt="MapaConceptual" src="https://github.com/user-attachments/assets/bacd6bf6-2c6a-4dc2-953c-547ac55f9109" />
+
+<img width="1024" height="559" alt="FlujoConceptual" src="https://github.com/user-attachments/assets/d328d5a1-9a05-4e61-be27-b2bf8df3f455" />
+
+<img width="1024" height="559" alt="FlujoSimplificadoKubernet" src="https://github.com/user-attachments/assets/e5b16a3f-3c32-4f1e-8a8b-1eb5c6901d18" />
+
+<img width="1024" height="559" alt="FlujoDespliegur" src="https://github.com/user-attachments/assets/f5204d6e-8e70-4eea-a4dd-52c268c65c72" />
+
+<img width="1024" height="559" alt="DiagramaResilencia" src="https://github.com/user-attachments/assets/4ffc53ed-4a9d-48ee-8b94-161ee6eca57b" />
+
+
+
+
+
+
 # Fase 1. Crear y acceder al cluster OKE
 
 ## Paso 1.1. Verificar prerrequisitos y cuotas
