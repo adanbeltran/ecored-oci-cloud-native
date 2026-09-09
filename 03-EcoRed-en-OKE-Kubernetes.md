@@ -494,6 +494,9 @@ read -r -p "Usuario utilizado en docker login: " OCIR_USERNAME
 read -r -s -p "Auth Token vigente de OCIR: " OCIR_AUTH_TOKEN; echo
 ```
 
+<img width="917" height="125" alt="image" src="https://github.com/user-attachments/assets/556c7e64-c64d-468b-9c17-d23f1316377c" />
+
+
 Antes de crear el Secret, valide las credenciales contra el manifiesto de la imagen privada:
 
 ```bash
