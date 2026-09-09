@@ -392,7 +392,10 @@ Este taller utiliza **OCI Cloud Shell**, que se abre en el navegador e incluye O
 curl -s https://api.ipify.org; echo
 ```
 
-Regrese temporalmente a `ecored-vcn → Security → Network Security Groups → ecored-oke-api-nsg → Security rules` y agregue una regla **stateful** con estos valores:
+<img width="697" height="70" alt="image" src="https://github.com/user-attachments/assets/75645786-62d8-40e0-bce8-b4d1be49f6df" />
+
+
+Ingrese a `ecored-vcn → Security → Network Security Groups → ecored-oke-api-nsg → Security rules` y agregue una regla **stateful** con estos valores:
 
 | Campo | Valor |
 |---|---|
@@ -403,16 +406,21 @@ Regrese temporalmente a `ecored-vcn → Security → Network Security Groups →
 | Destination Port Range | `6443` |
 | Descripción | `kubectl desde OCI Cloud Shell` |
 
-![Regla restringida para kubectl desde OCI Cloud Shell](assets/taller-3/21-regla-cloud-shell-redactada.png)
+<img width="1792" height="707" alt="image" src="https://github.com/user-attachments/assets/4a12f4b0-01e9-442e-bde9-9b3df10d128c" />
+
 
 > **Advertencia de seguridad:** no sustituya `/32` por `0.0.0.0/0`. La dirección pública de Cloud Shell puede cambiar al iniciar otra sesión; si eso ocurre, consulte la nueva dirección y actualice esta regla. Después de agregarla, `ecored-oke-api-nsg` debe contener ocho reglas.
 
 1. En el detalle del cluster `ecored-oke`, abra **Actions → Access cluster**.
 2. Seleccione **Cloud Shell Access** y pulse **Launch cloud shell**.
 
-![Acceso al cluster mediante OCI Cloud Shell con el OCID protegido](assets/taller-3/20-acceso-cloud-shell-redactado.png)
+<img width="1696" height="508" alt="image" src="https://github.com/user-attachments/assets/ea42222a-50fc-492c-af55-839ec2f6338c" />
+
 
 pulse **Copy** junto al comando generado por OCI. Péguelo completo en Cloud Shell y ejecútelo para crear o actualizar `$HOME/.kube/config`.
+
+<img width="1873" height="85" alt="image" src="https://github.com/user-attachments/assets/16abd35a-16a3-4bdc-a173-3f768cd6869d" />
+
 
 > **Advertencia:** no escriba `...` ni recorte el OCID. Los puntos suspensivos usados en explicaciones no son argumentos válidos; debe copiar el comando completo generado para su cluster, incluidos `--cluster-id`, `--file`, `--region`, `--token-version` y `--kube-endpoint PUBLIC_ENDPOINT`.
 
@@ -421,6 +429,8 @@ El resultado esperado incluye un mensaje similar a:
 ```text
 New config written to the Kubeconfig file /home/<usuario>/.kube/config
 ```
+<img width="1807" height="72" alt="image" src="https://github.com/user-attachments/assets/8639e5fa-1d8f-4545-83a2-96ceebe494d1" />
+
 
 Compruebe la conexión:
 
@@ -428,8 +438,11 @@ Compruebe la conexión:
 kubectl cluster-info
 kubectl get nodes
 ```
+<img width="925" height="170" alt="image" src="https://github.com/user-attachments/assets/f149d70f-4c5d-419a-a284-f6d96f451fd7" />
 
-![Worker del cluster en estado Ready](assets/taller-3/22-kubectl-node-ready-redactado.png)
+<img width="565" height="140" alt="image" src="https://github.com/user-attachments/assets/8adf481e-dda3-4de0-aa55-d9099300a8ca" />
+
+
 
 ### Verificación
 
@@ -442,7 +455,9 @@ kubectl create namespace ecored
 kubectl get namespace ecored
 ```
 
-![Namespace ecored creado y en estado Active](assets/taller-3/23-namespace-ecored-active-redactado.png)
+<img width="640" height="118" alt="image" src="https://github.com/user-attachments/assets/d364cb77-ba90-42cf-add1-91d2130a6ffb" />
+
+<img width="651" height="121" alt="image" src="https://github.com/user-attachments/assets/c062812c-bb20-4dac-9739-d215d1a7025a" />
 
 ### Verificación
 
