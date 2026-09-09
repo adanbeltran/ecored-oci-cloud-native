@@ -386,12 +386,7 @@ Capacity type: On-demand capacity
 
 Este taller utiliza **OCI Cloud Shell**, que se abre en el navegador e incluye OCI CLI y `kubectl`. Los estudiantes no necesitan instalar software en sus equipos.
 
-1. En el detalle del cluster `ecored-oke`, abra **Actions → Access cluster**.
-2. Seleccione **Cloud Shell Access** y pulse **Launch cloud shell**.
-
-![Acceso al cluster mediante OCI Cloud Shell con el OCID protegido](assets/taller-3/20-acceso-cloud-shell-redactado.png)
-
-En la terminal de Cloud Shell consulte la dirección IPv4 pública de la sesión:
+0. En la terminal de Cloud Shell consulte la dirección IPv4 pública de la sesión:
 
 ```bash
 curl -s https://api.ipify.org; echo
@@ -412,7 +407,12 @@ Regrese temporalmente a `ecored-vcn → Security → Network Security Groups →
 
 > **Advertencia de seguridad:** no sustituya `/32` por `0.0.0.0/0`. La dirección pública de Cloud Shell puede cambiar al iniciar otra sesión; si eso ocurre, consulte la nueva dirección y actualice esta regla. Después de agregarla, `ecored-oke-api-nsg` debe contener ocho reglas.
 
-Vuelva a **Access cluster** y pulse **Copy** junto al comando generado por OCI. Péguelo completo en Cloud Shell y ejecútelo para crear o actualizar `$HOME/.kube/config`.
+1. En el detalle del cluster `ecored-oke`, abra **Actions → Access cluster**.
+2. Seleccione **Cloud Shell Access** y pulse **Launch cloud shell**.
+
+![Acceso al cluster mediante OCI Cloud Shell con el OCID protegido](assets/taller-3/20-acceso-cloud-shell-redactado.png)
+
+pulse **Copy** junto al comando generado por OCI. Péguelo completo en Cloud Shell y ejecútelo para crear o actualizar `$HOME/.kube/config`.
 
 > **Advertencia:** no escriba `...` ni recorte el OCID. Los puntos suspensivos usados en explicaciones no son argumentos válidos; debe copiar el comando completo generado para su cluster, incluidos `--cluster-id`, `--file`, `--region`, `--token-version` y `--kube-endpoint PUBLIC_ENDPOINT`.
 
