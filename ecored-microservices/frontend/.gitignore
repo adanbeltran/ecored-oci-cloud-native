@@ -1,0 +1,30 @@
+# Dependencias y compilados
+node_modules/
+dist/
+dist-ssr/
+
+# Variables de entorno locales
+.env
+.env.*
+!.env.example
+
+# Registros
+logs/
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+lerna-debug.log*
+
+# Archivos locales y de editores
+*.local
+.vscode/*
+!.vscode/extensions.json
+.idea/
+.DS_Store
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+*.sw?

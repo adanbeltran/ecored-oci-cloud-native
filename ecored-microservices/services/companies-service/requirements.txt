@@ -1,0 +1,7 @@
+# Se fija la serie 5.2 para que la instalación sea reproducible en Python 3.13.
+Django>=5.2,<6.0
+djangorestframework>=3.16,<3.17
+pymongo>=4.13,<5
+python-dotenv>=1.1,<2
+django-cors-headers>=4.7,<5
+gunicorn>=23,<24

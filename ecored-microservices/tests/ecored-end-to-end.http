@@ -1,0 +1,87 @@
+# EcoRed - prueba integral con REST Client para Visual Studio Code
+#
+# Requisitos:
+# 1. Ejecute Empresas, Materiales y el gateway local.
+# 2. En Firebase Authentication habilite Email/Password y cree un usuario de prueba.
+# 3. Ejecute primero "firebaseLogin". REST Client pedirá los tres valores.
+# 4. Ejecute las solicitudes siguientes en el orden indicado.
+#
+# No escriba credenciales reales en este archivo ni lo publique con ellas.
+
+@gatewayUrl = http://127.0.0.1:8080
+@companiesUrl = http://127.0.0.1:8001
+@materialsUrl = http://127.0.0.1:8002
+@token = {{firebaseLogin.response.body.$.idToken}}
+@companyId = {{createCompany.response.body.$.id}}
+
+### 1. Salud del gateway: debe responder 200
+GET {{gatewayUrl}}/health
+Accept: application/json
+
+### 2. Ruta protegida sin token: debe responder 401
+GET {{gatewayUrl}}/api/companies
+Accept: application/json
+
+### 3. Obtener un ID token real de Firebase
+# @name firebaseLogin
+# @prompt firebaseApiKey API key de la aplicación web de Firebase
+# @prompt email Correo del usuario de prueba de Firebase
+# @prompt password Contraseña del usuario de prueba de Firebase
+POST https://identitytoolkit.googleapis.com/v1/accounts:signInWithPassword?key={{firebaseApiKey}}
+Content-Type: application/json
+
+{
+  "email": "{{email}}",
+  "password": "{{password}}",
+  "returnSecureToken": true
+}
+
+### 4. Crear una empresa: debe responder 201
+# @name createCompany
+POST {{gatewayUrl}}/api/companies
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "name": "Reciclajes Aula {{$timestamp}}",
+  "nit": "NIT-{{$timestamp}}",
+  "city": "Bogotá",
+  "sector": "Reciclaje"
+}
+
+### 5. Listar las empresas del usuario: debe incluir la recién creada
+GET {{gatewayUrl}}/api/companies
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 6. Publicar un material asociado a la empresa: debe responder 201
+# @name createMaterial
+POST {{gatewayUrl}}/api/materials
+Authorization: Bearer {{token}}
+Content-Type: application/json
+
+{
+  "company_id": "{{companyId}}",
+  "material_type": "Cartón",
+  "quantity": 25,
+  "unit": "kg",
+  "location": "Bogotá"
+}
+
+### 7. Consultar el material creado: debe responder 200
+GET {{gatewayUrl}}/api/materials/{{createMaterial.response.body.$.id}}
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 8. Listar materiales: debe incluir la publicación recién creada
+GET {{gatewayUrl}}/api/materials
+Authorization: Bearer {{token}}
+Accept: application/json
+
+### 9. Comprobar el límite de confianza de Empresas: debe responder 401
+GET {{companiesUrl}}/api/companies
+Accept: application/json
+
+### 10. Comprobar el límite de confianza de Materiales: debe responder 401
+GET {{materialsUrl}}/api/materials
+Accept: application/json

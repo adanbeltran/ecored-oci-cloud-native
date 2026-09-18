@@ -1,0 +1,15 @@
+.env
+.env.*
+!.env.example
+node_modules/
+venv/
+.venv/
+__pycache__/
+*.py[cod]
+*.log
+.DS_Store
+wallet/
+*.pem
+*.key
+firebase-service-account*.json
+

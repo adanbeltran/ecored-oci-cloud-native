@@ -1,0 +1,89 @@
+{
+  "requestPolicies": {
+    "authentication": {
+      "type": "TOKEN_AUTHENTICATION",
+      "tokenHeader": "Authorization",
+      "tokenAuthScheme": "Bearer",
+      "isAnonymousAccessAllowed": false,
+      "maxClockSkewInSeconds": 30,
+      "validationPolicy": {
+        "type": "REMOTE_JWKS",
+        "uri": "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
+        "isSslVerifyDisabled": false,
+        "maxCacheDurationInHours": 1,
+        "additionalValidationPolicy": {
+          "issuers": [
+            "https://securetoken.google.com/FIREBASE_PROJECT_ID"
+          ],
+          "audiences": [
+            "FIREBASE_PROJECT_ID"
+          ],
+          "verifyClaims": [
+            {
+              "key": "sub",
+              "isRequired": true
+            }
+          ]
+        }
+      }
+    },
+    "headerTransformations": {
+      "setHeaders": {
+        "items": [
+          {
+            "name": "X-User-Id",
+            "values": ["${request.auth[sub]}"],
+            "ifExists": "OVERWRITE"
+          },
+          {
+            "name": "X-User-Email",
+            "values": ["${request.auth[email]}"],
+            "ifExists": "OVERWRITE"
+          }
+        ]
+      }
+    },
+    "cors": {
+      "allowedOrigins": ["FRONTEND_ORIGIN"],
+      "allowedMethods": ["GET", "POST", "OPTIONS"],
+      "allowedHeaders": ["Authorization", "Content-Type"],
+      "exposedHeaders": [],
+      "isAllowCredentialsEnabled": false,
+      "maxAgeInSeconds": 3600
+    }
+  },
+  "routes": [
+    {
+      "path": "/companies",
+      "methods": ["GET", "POST"],
+      "backend": {
+        "type": "HTTP_BACKEND",
+        "url": "https://OKE_ENTRY/api/companies"
+      }
+    },
+    {
+      "path": "/companies/{companyId}",
+      "methods": ["GET"],
+      "backend": {
+        "type": "HTTP_BACKEND",
+        "url": "https://OKE_ENTRY/api/companies/${request.path[companyId]}"
+      }
+    },
+    {
+      "path": "/materials",
+      "methods": ["GET", "POST"],
+      "backend": {
+        "type": "HTTP_BACKEND",
+        "url": "https://OKE_ENTRY/api/materials"
+      }
+    },
+    {
+      "path": "/materials/{materialId}",
+      "methods": ["GET"],
+      "backend": {
+        "type": "HTTP_BACKEND",
+        "url": "https://OKE_ENTRY/api/materials/${request.path[materialId]}"
+      }
+    }
+  ]
+}
