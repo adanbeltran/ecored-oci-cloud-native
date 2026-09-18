@@ -42,6 +42,19 @@ GRANT CREATE TABLE TO ecored;
 GRANT CREATE SEQUENCE TO ecored;
 ```
 
+```sql
+BEGIN
+    ORDS_ADMIN.ENABLE_SCHEMA(
+        p_enabled             => TRUE,
+        p_schema              => 'ECORED',
+        p_url_mapping_type    => 'BASE_PATH',
+        p_url_mapping_pattern => 'ecored',
+        p_auto_rest_auth      => FALSE
+    );
+
+    COMMIT;
+END;
+```
 Después, cierre la sesión de `ADMIN` y conéctese con el usuario `ecored`.
 
 Crear la tabla de materiales:
