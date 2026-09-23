@@ -1,0 +1,284 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecored-companies
+  namespace: ecored
+  labels:
+    app: ecored-companies
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: ecored-companies
+  template:
+    metadata:
+      labels:
+        app: ecored-companies
+    spec:
+      imagePullSecrets:
+        - name: ocir-secret
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: companies
+          image: __OCIR_PREFIX__/ecored-companies:__VERSION__
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8001
+          envFrom:
+            - configMapRef:
+                name: companies-config
+            - secretRef:
+                name: companies-secrets
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 5
+            failureThreshold: 30
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecored-companies
+  namespace: ecored
+  annotations:
+    oci.oraclecloud.com/load-balancer-type: "lb"
+    service.beta.kubernetes.io/oci-load-balancer-internal: "true"
+    service.beta.kubernetes.io/oci-load-balancer-subnet1: "__PRIVATE_SUBNET_OCID__"
+    oci.oraclecloud.com/security-rule-management-mode: "NSG"
+    oci.oraclecloud.com/oci-backend-network-security-group: "__WORKLOADS_NSG_OCID__"
+    service.beta.kubernetes.io/oci-load-balancer-shape: "flexible"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-min: "10"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-max: "10"
+spec:
+  type: LoadBalancer
+  loadBalancerSourceRanges:
+    - __PUBLIC_SUBNET_CIDR__
+  selector:
+    app: ecored-companies
+  ports:
+    - name: http
+      port: 8001
+      targetPort: http
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ecored-companies-pdb
+  namespace: ecored
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: ecored-companies
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecored-materials
+  namespace: ecored
+  labels:
+    app: ecored-materials
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: ecored-materials
+  template:
+    metadata:
+      labels:
+        app: ecored-materials
+    spec:
+      imagePullSecrets:
+        - name: ocir-secret
+      terminationGracePeriodSeconds: 30
+      containers:
+        - name: materials
+          image: __OCIR_PREFIX__/ecored-materials:__VERSION__
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 8002
+          envFrom:
+            - configMapRef:
+                name: materials-config
+            - secretRef:
+                name: materials-secrets
+          startupProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 5
+            failureThreshold: 36
+          readinessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 10
+            failureThreshold: 3
+          livenessProbe:
+            httpGet:
+              path: /api/health
+              port: http
+            periodSeconds: 20
+            failureThreshold: 3
+          resources:
+            requests:
+              cpu: 100m
+              memory: 128Mi
+            limits:
+              cpu: 500m
+              memory: 512Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecored-materials
+  namespace: ecored
+  annotations:
+    oci.oraclecloud.com/load-balancer-type: "lb"
+    service.beta.kubernetes.io/oci-load-balancer-internal: "true"
+    service.beta.kubernetes.io/oci-load-balancer-subnet1: "__PRIVATE_SUBNET_OCID__"
+    oci.oraclecloud.com/security-rule-management-mode: "NSG"
+    oci.oraclecloud.com/oci-backend-network-security-group: "__WORKLOADS_NSG_OCID__"
+    service.beta.kubernetes.io/oci-load-balancer-shape: "flexible"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-min: "10"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-max: "10"
+spec:
+  type: LoadBalancer
+  loadBalancerSourceRanges:
+    - __PUBLIC_SUBNET_CIDR__
+  selector:
+    app: ecored-materials
+  ports:
+    - name: http
+      port: 8002
+      targetPort: http
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ecored-materials-pdb
+  namespace: ecored
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: ecored-materials
+---
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: ecored-frontend
+  namespace: ecored
+  labels:
+    app: ecored-frontend
+spec:
+  replicas: 2
+  strategy:
+    type: RollingUpdate
+    rollingUpdate:
+      maxUnavailable: 0
+      maxSurge: 1
+  selector:
+    matchLabels:
+      app: ecored-frontend
+  template:
+    metadata:
+      labels:
+        app: ecored-frontend
+    spec:
+      imagePullSecrets:
+        - name: ocir-secret
+      terminationGracePeriodSeconds: 20
+      containers:
+        - name: frontend
+          image: __OCIR_PREFIX__/ecored-frontend:__VERSION__
+          imagePullPolicy: IfNotPresent
+          ports:
+            - name: http
+              containerPort: 80
+          envFrom:
+            - configMapRef:
+                name: frontend-config
+          readinessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 10
+          livenessProbe:
+            httpGet:
+              path: /
+              port: http
+            periodSeconds: 20
+          resources:
+            requests:
+              cpu: 50m
+              memory: 64Mi
+            limits:
+              cpu: 250m
+              memory: 256Mi
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: ecored-frontend
+  namespace: ecored
+  annotations:
+    oci.oraclecloud.com/load-balancer-type: "lb"
+    service.beta.kubernetes.io/oci-load-balancer-subnet1: "__PUBLIC_SUBNET_OCID__"
+    oci.oraclecloud.com/security-rule-management-mode: "NSG"
+    oci.oraclecloud.com/oci-backend-network-security-group: "__WORKLOADS_NSG_OCID__"
+    service.beta.kubernetes.io/oci-load-balancer-shape: "flexible"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-min: "10"
+    service.beta.kubernetes.io/oci-load-balancer-shape-flex-max: "10"
+spec:
+  type: LoadBalancer
+  selector:
+    app: ecored-frontend
+  ports:
+    - name: http
+      port: 80
+      targetPort: http
+---
+apiVersion: policy/v1
+kind: PodDisruptionBudget
+metadata:
+  name: ecored-frontend-pdb
+  namespace: ecored
+spec:
+  minAvailable: 1
+  selector:
+    matchLabels:
+      app: ecored-frontend
+

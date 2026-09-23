@@ -1,0 +1,58 @@
+[
+  {
+    "description": "HTTPS publico hacia OCI API Gateway",
+    "direction": "INGRESS",
+    "isStateless": false,
+    "protocol": "6",
+    "source": "0.0.0.0/0",
+    "sourceType": "CIDR_BLOCK",
+    "tcpOptions": {
+      "destinationPortRange": {
+        "min": 443,
+        "max": 443
+      }
+    }
+  },
+  {
+    "description": "OCI API Gateway hacia Companies",
+    "direction": "EGRESS",
+    "isStateless": false,
+    "protocol": "6",
+    "destination": "__PRIVATE_SUBNET_CIDR__",
+    "destinationType": "CIDR_BLOCK",
+    "tcpOptions": {
+      "destinationPortRange": {
+        "min": 8001,
+        "max": 8001
+      }
+    }
+  },
+  {
+    "description": "OCI API Gateway hacia Materials",
+    "direction": "EGRESS",
+    "isStateless": false,
+    "protocol": "6",
+    "destination": "__PRIVATE_SUBNET_CIDR__",
+    "destinationType": "CIDR_BLOCK",
+    "tcpOptions": {
+      "destinationPortRange": {
+        "min": 8002,
+        "max": 8002
+      }
+    }
+  },
+  {
+    "description": "OCI API Gateway consulta JWKS de Firebase",
+    "direction": "EGRESS",
+    "isStateless": false,
+    "protocol": "6",
+    "destination": "0.0.0.0/0",
+    "destinationType": "CIDR_BLOCK",
+    "tcpOptions": {
+      "destinationPortRange": {
+        "min": 443,
+        "max": 443
+      }
+    }
+  }
+]

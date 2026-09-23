@@ -1,0 +1,2 @@
+Allow any-user to manage network-security-groups in compartment __COMPARTMENT_NAME__ where request.principal.type = 'cluster'
+Allow any-user to manage virtual-network-family in compartment __COMPARTMENT_NAME__ where request.principal.type = 'cluster'
