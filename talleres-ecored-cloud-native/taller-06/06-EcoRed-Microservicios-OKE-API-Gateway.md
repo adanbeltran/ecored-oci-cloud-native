@@ -924,31 +924,136 @@ Pod frontend → DNS de Kubernetes → Service → Pod del microservicio
 [↑ Volver al índice](#indice)
 
 ---
-
 <a id="fase-4"></a>
 
 # Fase 4. Crear OCI API Gateway y activar el frontend
+
+Esta fase continúa con la misma convención utilizada correctamente hasta la Fase 3: los archivos de trabajo están en la carpeta actual de Cloud Shell. Por tanto, se utilizarán rutas como `oci.oke.env`, `network-resolved.oke.env` y `frontend-config.oke.env`, sin mezclar posteriormente rutas `config/` u `oci/`.
+
+El orden de ejecución será:
+
+1. obtener las IP de los tres Load Balancers;
+2. ajustar Django y Firebase;
+3. crear o reutilizar el NSG de API Gateway;
+4. configurar y verificar las cuatro reglas del NSG;
+5. crear o reutilizar OCI API Gateway;
+6. comprobar o corregir la asociación del NSG;
+7. crear o actualizar el deployment de la API;
+8. inyectar la URL pública del gateway en el frontend.
+
+Antes de continuar, confirme que la Fase 3 sigue saludable:
+
+```bash
+kubectl get deployments,pods,services,pdb \
+  -n ecored \
+  -o wide
+```
+
+El resultado esperado es:
+
+- tres Deployments con `2/2` réplicas disponibles;
+- seis Pods con `1/1 Running`;
+- Companies y Materials con IP privadas;
+- frontend con IP pública;
+- ningún Service con `EXTERNAL-IP` en `<pending>`.
+
+Compruebe también que están disponibles los archivos que utilizará la fase:
+
+```bash
+PHASE4_FILE_ERRORS=0
+
+for FILE in \
+  oci.oke.env \
+  network-resolved.oke.env \
+  companies-config.oke.env \
+  frontend-config.oke.env \
+  api-gateway-nsg-rules.template.json \
+  ecored-api-deployment.template.json; do
+
+  if [ -f "$FILE" ]; then
+    printf 'OK: %s\n' "$FILE"
+  else
+    printf 'ERROR: no se encontró %s\n' "$FILE"
+    PHASE4_FILE_ERRORS=$((PHASE4_FILE_ERRORS + 1))
+  fi
+done
+
+printf 'Archivos faltantes: %s\n' "$PHASE4_FILE_ERRORS"
+```
+
+El resultado debe finalizar con:
+
+```text
+Archivos faltantes: 0
+```
+
+No continúe si falta algún archivo.
 
 <a id="f4-41"></a>
 
 ## F4-4.1. Obtener las direcciones y ajustar Django
 
+### Obtener las IP de los Load Balancers
+
+Ejecute:
+
 ```bash
 COMPANIES_LB_IP=$(kubectl get service ecored-companies \
-  -n ecored -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  -n ecored \
+  -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
 MATERIALS_LB_IP=$(kubectl get service ecored-materials \
-  -n ecored -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  -n ecored \
+  -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+
 FRONTEND_LB_IP=$(kubectl get service ecored-frontend \
-  -n ecored -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
+  -n ecored \
+  -o jsonpath='{.status.loadBalancer.ingress[0].ip}')
 
 printf 'Companies privado: %s\nMaterials privado: %s\nFrontend público: %s\n' \
-  "$COMPANIES_LB_IP" "$MATERIALS_LB_IP" "$FRONTEND_LB_IP"
+  "$COMPANIES_LB_IP" \
+  "$MATERIALS_LB_IP" \
+  "$FRONTEND_LB_IP"
 ```
-![alt text](image-20.png)
 
-Companies y Materials deben tener IP privadas y frontend una IP pública. Si algún valor está vacío, espere el aprovisionamiento del Service antes de continuar.
+Valide que ninguna dirección esté vacía:
 
-Guarde inmediatamente los resultados; este archivo se ampliará en los pasos siguientes:
+```bash
+LB_IP_ERRORS=0
+
+for VARIABLE in \
+  COMPANIES_LB_IP \
+  MATERIALS_LB_IP \
+  FRONTEND_LB_IP; do
+
+  VALUE="${!VARIABLE}"
+
+  if [ -z "$VALUE" ] || [ "$VALUE" = "null" ]; then
+    printf 'ERROR: %s está vacía.\n' "$VARIABLE"
+    LB_IP_ERRORS=$((LB_IP_ERRORS + 1))
+  else
+    printf 'OK: %-20s %s\n' "$VARIABLE" "$VALUE"
+  fi
+done
+
+printf 'Errores encontrados: %s\n' "$LB_IP_ERRORS"
+```
+
+El resultado debe finalizar con:
+
+```text
+Errores encontrados: 0
+```
+
+Companies y Materials deben mostrar direcciones privadas; el frontend debe mostrar una dirección pública. Si alguna dirección está vacía, espere el aprovisionamiento y vuelva a consultar:
+
+```bash
+kubectl get services -n ecored -o wide
+```
+
+### Guardar las IP resueltas
+
+Guarde inmediatamente los resultados. El archivo se ampliará en los pasos siguientes:
 
 ```bash
 printf '%s\n' \
@@ -958,48 +1063,170 @@ printf '%s\n' \
   > runtime-resolved.oke.env
 
 chmod 600 runtime-resolved.oke.env
-cat runtime-resolved.oke.env 
+cat runtime-resolved.oke.env
 ```
-![alt text](image-21.png)
-Actualice el archivo de Companies y vuelva a aplicar el ConfigMap:
+
+Este archivo no contiene contraseñas, pero sí direcciones de infraestructura. No publique una captura con información que no sea necesaria para la evidencia.
+
+### Ajustar `DJANGO_ALLOWED_HOSTS` y CORS
+
+API Gateway llegará a Companies mediante la IP privada del Load Balancer. Django debe reconocer esa IP como host permitido.
+
+El navegador, en cambio, se ejecutará desde el origen público del frontend. En esta etapa el frontend utiliza HTTP:
 
 ```bash
+FRONTEND_ORIGIN="http://${FRONTEND_LB_IP}"
+
 sed -i \
-  "s|^DJANGO_ALLOWED_HOSTS=.*|DJANGO_ALLOWED_HOSTS=ecored-companies,${COMPANIES_LB_IP},localhost,127.0.0.1|" \
+  -e "s|^DJANGO_ALLOWED_HOSTS=.*|DJANGO_ALLOWED_HOSTS=ecored-companies,${COMPANIES_LB_IP},localhost,127.0.0.1|" \
+  -e "s|^CORS_ALLOWED_ORIGINS=.*|CORS_ALLOWED_ORIGINS=${FRONTEND_ORIGIN},http://127.0.0.1:8088,http://localhost:8088|" \
   companies-config.oke.env
-  cat companies-config.oke.env 
+
+grep -E '^(DJANGO_ALLOWED_HOSTS|CORS_ALLOWED_ORIGINS)=' \
+  companies-config.oke.env
 ```
-![alt text](image-22.png)
+
+La salida debe mostrar los valores actualizados. Por ejemplo:
+
+```text
+DJANGO_ALLOWED_HOSTS=ecored-companies,10.x.x.x,localhost,127.0.0.1
+CORS_ALLOWED_ORIGINS=http://<FRONTEND_LB_IP>,http://127.0.0.1:8088,http://localhost:8088
+```
+
+No utilice `DJANGO_ALLOWED_HOSTS=*`.
+
+Si posteriormente publica el frontend con HTTPS o con un dominio propio, reemplace `FRONTEND_ORIGIN` por el origen real, incluyendo `https://` y sin una `/` al final.
+
+### Aplicar el ConfigMap actualizado
 
 ```bash
 kubectl create configmap companies-config \
   --namespace ecored \
-  --from-env-file=config/companies-config.oke.env \
-  --dry-run=client -o yaml | kubectl apply -f -
+  --from-env-file=companies-config.oke.env \
+  --dry-run=client \
+  -o yaml | kubectl apply -f -
 
-kubectl rollout restart deployment/ecored-companies -n ecored
-kubectl rollout status deployment/ecored-companies -n ecored
+kubectl rollout restart deployment/ecored-companies \
+  -n ecored
+
+kubectl rollout status deployment/ecored-companies \
+  -n ecored \
+  --timeout=5m
 ```
-![alt text](image-23.png)
-No utilice `DJANGO_ALLOWED_HOSTS=*`.
 
-Agregue la IP o el dominio público del frontend en **Firebase Authentication → Configuración → Dominios autorizados**, sin protocolo, puerto ni ruta.
+Compruebe el resultado:
 
-![alt text](image-24.png)
+```bash
+kubectl get deployment,pods \
+  -n ecored \
+  -l app=ecored-companies \
+  -o wide
+```
+
+El Deployment debe mostrar `2/2` réplicas disponibles y los dos Pods deben aparecer `1/1 Running`.
+
+Vuelva a comprobar la comunicación interna:
+
+```bash
+kubectl exec -n ecored deployment/ecored-frontend -- \
+  sh -c 'wget -qO- http://ecored-companies:8001/api/health'
+```
+
+El resultado esperado es:
+
+```json
+{"service":"companies","status":"ok"}
+```
+
+### Autorizar el frontend en Firebase
+
+Muestre el valor que debe registrar:
+
+```bash
+printf 'Dominio autorizado en Firebase: %s\n' "$FRONTEND_LB_IP"
+```
+
+En **Firebase Authentication → Configuración → Dominios autorizados**, agregue la IP o el dominio público utilizado para abrir el frontend.
+
+Registre únicamente el host:
+
+- sin `http://` ni `https://`;
+- sin puerto;
+- sin ruta;
+- no agregue la IP privada de Companies;
+- no agregue la IP privada de Materials;
+- no agregue el hostname de API Gateway como dominio del frontend.
+
+La diferencia es importante:
+
+| Configuración | Formato esperado |
+|---|---|
+| Firebase, dominio autorizado | `163.176.x.x` o `app.ejemplo.com` |
+| CORS, origen autorizado | `http://163.176.x.x` o `https://app.ejemplo.com` |
 
 <a id="f4-42"></a>
 
 ## F4-4.2. Crear el NSG y OCI API Gateway
 
-Cargue los archivos generados hasta este punto:
+### Función del NSG de API Gateway
+
+Un Network Security Group (NSG) funciona como un firewall virtual aplicado a las VNIC de los recursos asociados. El NSG de esta fase protege específicamente a OCI API Gateway y no reemplaza los controles creados para OKE.
+
+| Control de red | Recurso protegido | Función |
+|---|---|---|
+| NSG del endpoint de OKE | API de Kubernetes | Controlar el acceso administrativo al clúster. |
+| `ecored-workloads-nsg` | VNIC de los worker nodes | Permitir la comunicación necesaria entre los balanceadores, nodos y Pods. |
+| NSG frontal administrado por OKE | Cada Load Balancer creado por un Service | Controlar el tráfico que entra al balanceador y llega a sus backends. |
+| `ecored-api-gateway-nsg` | VNIC de OCI API Gateway | Recibir HTTPS y permitir salidas hacia Companies, Materials y Firebase. |
+
+Aunque los recursos se encuentren en la misma VCN, cada NSG tiene un alcance distinto. Crear un NSG tampoco lo asocia automáticamente con API Gateway: la asociación debe declararse al crear o actualizar el gateway.
+
+Las reglas de salida del NSG de API Gateway no sustituyen las reglas de entrada de los Load Balancers privados. Estas ya se prepararon en las fases 2 y 3 mediante los NSG administrados por OKE y `loadBalancerSourceRanges`.
+
+### Cargar y validar las variables
 
 ```bash
 source oci.oke.env
 source network-resolved.oke.env
 source runtime-resolved.oke.env
+
+PHASE4_VARIABLE_ERRORS=0
+
+for VARIABLE in \
+  COMPARTMENT_OCID \
+  VCN_OCID \
+  PUBLIC_SUBNET_OCID \
+  PRIVATE_SUBNET_CIDR \
+  API_GATEWAY_NSG_NAME \
+  API_GATEWAY_NAME \
+  API_DEPLOYMENT_NAME \
+  API_PATH_PREFIX \
+  COMPANIES_LB_IP \
+  MATERIALS_LB_IP \
+  FRONTEND_LB_IP; do
+
+  VALUE="${!VARIABLE}"
+
+  if [ -z "$VALUE" ] || [ "$VALUE" = "null" ]; then
+    printf 'ERROR: %s no tiene valor.\n' "$VARIABLE"
+    PHASE4_VARIABLE_ERRORS=$((PHASE4_VARIABLE_ERRORS + 1))
+  else
+    printf 'OK: %s\n' "$VARIABLE"
+  fi
+done
+
+printf 'Errores encontrados: %s\n' "$PHASE4_VARIABLE_ERRORS"
 ```
 
-Renderice el archivo de reglas. Aquí se utiliza `PRIVATE_SUBNET_CIDR`, obtenido en F2-2.2:
+El resultado debe finalizar con:
+
+```text
+Errores encontrados: 0
+```
+
+### Generar las reglas del NSG
+
+Renderice el archivo utilizando el CIDR de la subred privada obtenido en F2-2.2:
 
 ```bash
 sed \
@@ -1008,45 +1235,73 @@ sed \
   > api-gateway-nsg-rules.json
 
 jq empty api-gateway-nsg-rules.json
+
+if grep -n '__[A-Z_]*__' api-gateway-nsg-rules.json; then
+  echo 'ERROR: quedaron marcadores sin reemplazar.'
+else
+  echo 'Archivo de reglas válido y completamente renderizado.'
+fi
 ```
-<img width="711" height="143" alt="image" src="https://github.com/user-attachments/assets/06f1bfb6-d95f-4a85-8cda-cefa972da0f1" />
 
+`jq empty` no muestra salida cuando el JSON es válido.
 
-El archivo define estas reglas **stateful**:
+Revise las reglas generadas:
+
+```bash
+jq . api-gateway-nsg-rules.json
+```
+
+El archivo debe contener cuatro reglas stateful:
 
 | Dirección | Origen o destino | Puerto | Propósito |
 |---|---|---:|---|
 | Ingress | `0.0.0.0/0` | TCP 443 | Recibir HTTPS del navegador. |
-| Egress | CIDR de `ecored-workloads-private` | TCP 8001 | Llegar al LB privado de Companies. |
-| Egress | CIDR de `ecored-workloads-private` | TCP 8002 | Llegar al LB privado de Materials. |
-| Egress | `0.0.0.0/0` | TCP 443 | Consultar JWKS de Firebase. |
+| Egress | CIDR de `ecored-workloads-private` | TCP 8001 | Llegar al Load Balancer privado de Companies. |
+| Egress | CIDR de `ecored-workloads-private` | TCP 8002 | Llegar al Load Balancer privado de Materials. |
+| Egress | `0.0.0.0/0` | TCP 443 | Consultar las claves JWKS de Firebase. |
 
-Consulte el archivo api-gateway-nsg-rules.json
+Al ser stateful, OCI permite automáticamente el tráfico de respuesta de las conexiones autorizadas. No agregue reglas inversas duplicadas.
 
-```bash
-cat api-gateway-nsg-rules.json
-```
-<img width="672" height="573" alt="image" src="https://github.com/user-attachments/assets/3e719949-2da7-45bd-be4f-41a89443528b" />
+### Crear o reutilizar el NSG
 
-### Verificar el NSG de API Gateway
-
-Compruebe que el NSG exista y se encuentre disponible:
+Busque el NSG por nombre dentro del compartimento y la VCN:
 
 ```bash
-oci network nsg get \
-  --nsg-id "$API_GATEWAY_NSG_OCID" \
-  --query 'data.{Nombre:"display-name",Estado:"lifecycle-state",OCID:id}' \
-  --output table
+API_GATEWAY_NSG_OCID=$(oci network nsg list \
+  --compartment-id "$COMPARTMENT_OCID" \
+  --vcn-id "$VCN_OCID" \
+  --display-name "$API_GATEWAY_NSG_NAME" \
+  --all \
+  --query 'data[0].id' \
+  --raw-output)
 ```
 
-El resultado esperado debe mostrar:
+Si no existe, créelo. Si ya existe, reutilice su OCID:
 
-```text
-Nombre: ecored-api-gateway-nsg
-Estado: AVAILABLE
+```bash
+if [ -z "$API_GATEWAY_NSG_OCID" ] || \
+   [ "$API_GATEWAY_NSG_OCID" = "null" ]; then
+
+  API_GATEWAY_NSG_OCID=$(oci network nsg create \
+    --compartment-id "$COMPARTMENT_OCID" \
+    --vcn-id "$VCN_OCID" \
+    --display-name "$API_GATEWAY_NSG_NAME" \
+    --wait-for-state AVAILABLE \
+    --query 'data.id' \
+    --raw-output)
+
+  printf 'NSG creado: %s\n' "$API_GATEWAY_NSG_OCID"
+else
+  printf 'Se reutilizará el NSG existente: %s\n' \
+    "$API_GATEWAY_NSG_OCID"
+fi
 ```
 
-Compruebe la cantidad de reglas configuradas:
+Un resultado vacío en la primera consulta es normal cuando se ejecuta el taller por primera vez: significa que el NSG todavía no existe.
+
+### Agregar las reglas sin duplicarlas
+
+Cuente primero las reglas existentes:
 
 ```bash
 NSG_RULE_COUNT=$(oci network nsg rules list \
@@ -1055,7 +1310,58 @@ NSG_RULE_COUNT=$(oci network nsg rules list \
   --query 'length(data)' \
   --raw-output)
 
-printf 'Reglas configuradas en el NSG: %s\n' "$NSG_RULE_COUNT"
+printf 'Reglas encontradas antes de aplicar: %s\n' \
+  "$NSG_RULE_COUNT"
+```
+
+Aplique el archivo únicamente si el NSG está vacío:
+
+```bash
+if [ "$NSG_RULE_COUNT" -eq 0 ]; then
+  oci network nsg rules add \
+    --nsg-id "$API_GATEWAY_NSG_OCID" \
+    --security-rules file://api-gateway-nsg-rules.json \
+    > /dev/null
+
+  echo 'Se agregaron las cuatro reglas al NSG.'
+elif [ "$NSG_RULE_COUNT" -eq 4 ]; then
+  echo 'El NSG ya tiene cuatro reglas; no se duplicarán.'
+else
+  printf 'ERROR: el NSG tiene %s reglas. Revise su contenido antes de continuar.\n' \
+    "$NSG_RULE_COUNT"
+fi
+```
+
+Si aparecen una, dos, tres o más de cuatro reglas, deténgase. No agregue nuevamente el archivo porque produciría reglas duplicadas.
+
+### Verificar el NSG y sus reglas
+
+Compruebe el recurso:
+
+```bash
+oci network nsg get \
+  --nsg-id "$API_GATEWAY_NSG_OCID" \
+  --query 'data.{
+    Nombre:"display-name",
+    Estado:"lifecycle-state",
+    OCID:id
+  }' \
+  --output table
+```
+
+El nombre debe ser `ecored-api-gateway-nsg` y el estado debe ser `AVAILABLE`.
+
+Compruebe la cantidad final:
+
+```bash
+NSG_RULE_COUNT=$(oci network nsg rules list \
+  --nsg-id "$API_GATEWAY_NSG_OCID" \
+  --all \
+  --query 'length(data)' \
+  --raw-output)
+
+printf 'Reglas configuradas en el NSG: %s\n' \
+  "$NSG_RULE_COUNT"
 ```
 
 El resultado esperado es:
@@ -1064,7 +1370,7 @@ El resultado esperado es:
 Reglas configuradas en el NSG: 4
 ```
 
-Liste las reglas para verificar su configuración:
+El número por sí solo no demuestra que las reglas sean correctas. Liste su contenido:
 
 ```bash
 oci network nsg rules list \
@@ -1075,67 +1381,176 @@ oci network nsg rules list \
     Protocolo:protocol,
     Origen:source,
     Destino:destination,
+    PuertoInicial:"tcp-options"."destination-port-range".min,
+    PuertoFinal:"tcp-options"."destination-port-range".max,
+    SinEstado:"is-stateless",
     Descripcion:description
   }' \
   --output table
 ```
 
-Deben aparecer cuatro reglas:
+En la salida:
 
-1. Entrada TCP 443 desde Internet.
-2. Salida TCP 8001 hacia Companies.
-3. Salida TCP 8002 hacia Materials.
-4. Salida TCP 443 para consultar Firebase.
+- el protocolo `6` representa TCP;
+- `SinEstado` debe ser `False` en las cuatro reglas;
+- deben aparecer los puertos `443`, `8001`, `8002` y nuevamente `443`;
+- las dos reglas de backend deben utilizar `PRIVATE_SUBNET_CIDR` como destino.
 
+### Crear o reutilizar OCI API Gateway
 
-Después de crear API Gateway, compruebe también que el NSG quedó asociado:
-
-```bash
-oci api-gateway gateway get \
-  --gateway-id "$GATEWAY_OCID" \
-  --query 'data.{
-    Nombre:"display-name",
-    Estado:"lifecycle-state",
-    NSG:"network-security-group-ids"
-  }' \
-  --output json
-```
-El campo NSG debe contener el mismo valor almacenado en:
-```bash
-printf '%s\n' "$API_GATEWAY_NSG_OCID"
-```
-De esta manera se validan tres aspectos diferentes:
-
-NSG creado → cuatro reglas configuradas → NSG asociado a API Gateway
+Busque el gateway por su nombre:
 
 ```bash
 GATEWAY_OCID=$(oci api-gateway gateway list \
   --compartment-id "$COMPARTMENT_OCID" \
   --display-name "$API_GATEWAY_NAME" \
-  --query 'data.items[0].id' --raw-output)
+  --all \
+  --query 'data.items[0].id' \
+  --raw-output)
 
-if [ -z "$GATEWAY_OCID" ] || [ "$GATEWAY_OCID" = "null" ]; then
-  GATEWAY_OCID=$(oci api-gateway gateway create \
+SINGLE_GATEWAY_NSG_IDS=$(jq -cn \
+  --arg id "$API_GATEWAY_NSG_OCID" \
+  '[$id]')
+```
+
+Si no existe, créelo como gateway público en la subred pública y espere a que la solicitud de trabajo finalice:
+
+```bash
+if [ -z "$GATEWAY_OCID" ] || \
+   [ "$GATEWAY_OCID" = "null" ]; then
+
+  oci api-gateway gateway create \
     --compartment-id "$COMPARTMENT_OCID" \
     --display-name "$API_GATEWAY_NAME" \
     --endpoint-type PUBLIC \
     --subnet-id "$PUBLIC_SUBNET_OCID" \
-    --network-security-group-ids "[\"${API_GATEWAY_NSG_OCID}\"]" \
-    --query 'data.id' --raw-output)
+    --network-security-group-ids "$SINGLE_GATEWAY_NSG_IDS" \
+    --wait-for-state SUCCEEDED \
+    > /dev/null
 
-  oci api-gateway gateway get \
-    --gateway-id "$GATEWAY_OCID" \
-    --wait-for-state ACTIVE > /dev/null
+  GATEWAY_OCID=$(oci api-gateway gateway list \
+    --compartment-id "$COMPARTMENT_OCID" \
+    --display-name "$API_GATEWAY_NAME" \
+    --all \
+    --query 'data.items[0].id' \
+    --raw-output)
+
+  printf 'API Gateway creado: %s\n' "$GATEWAY_OCID"
 else
-  echo "Se reutilizará el gateway existente: ${API_GATEWAY_NAME}"
+  printf 'Se reutilizará el gateway existente: %s\n' \
+    "$GATEWAY_OCID"
 fi
+```
+
+> En la versión actual de OCI CLI, `gateway create` espera estados de la solicitud de trabajo, como `SUCCEEDED`. El comando `gateway get` solamente consulta el recurso y no acepta `--wait-for-state`.
+
+### Verificar o corregir la asociación del NSG
+
+Un gateway reutilizado podría haber sido creado sin el NSG nuevo. Obtenga la asociación existente:
+
+```bash
+CURRENT_GATEWAY_NSG_IDS=$(oci api-gateway gateway get \
+  --gateway-id "$GATEWAY_OCID" \
+  --query 'data."network-security-group-ids"' \
+  --output json | jq -c '. // []')
+
+printf 'NSG asociados actualmente: %s\n' \
+  "$CURRENT_GATEWAY_NSG_IDS"
+```
+
+Compruebe si contiene `API_GATEWAY_NSG_OCID`. Si falta, agréguelo sin retirar los NSG que ya tuviera el gateway:
+
+```bash
+if printf '%s' "$CURRENT_GATEWAY_NSG_IDS" | \
+  jq -e --arg id "$API_GATEWAY_NSG_OCID" \
+    'index($id) != null' \
+  > /dev/null; then
+
+  echo 'El NSG ya está asociado correctamente con API Gateway.'
+else
+  MERGED_GATEWAY_NSG_IDS=$(jq -cn \
+    --argjson current "$CURRENT_GATEWAY_NSG_IDS" \
+    --arg id "$API_GATEWAY_NSG_OCID" \
+    '$current + [$id] | unique')
+
+  oci api-gateway gateway update \
+    --gateway-id "$GATEWAY_OCID" \
+    --network-security-group-ids "$MERGED_GATEWAY_NSG_IDS" \
+    --force \
+    --wait-for-state SUCCEEDED \
+    > /dev/null
+
+  echo 'El NSG fue agregado a API Gateway.'
+fi
+```
+
+Esta versión conserva cualquier otro NSG previamente asociado. La opción `--network-security-group-ids` reemplaza el arreglo completo; por eso primero se recupera y combina su contenido.
+
+### Verificar el estado final de API Gateway
+
+```bash
+GATEWAY_STATE=$(oci api-gateway gateway get \
+  --gateway-id "$GATEWAY_OCID" \
+  --query 'data."lifecycle-state"' \
+  --raw-output)
 
 GATEWAY_HOSTNAME=$(oci api-gateway gateway get \
   --gateway-id "$GATEWAY_OCID" \
-  --query 'data.hostname' --raw-output)
+  --query 'data.hostname' \
+  --raw-output)
+
+GATEWAY_ENDPOINT_TYPE=$(oci api-gateway gateway get \
+  --gateway-id "$GATEWAY_OCID" \
+  --query 'data."endpoint-type"' \
+  --raw-output)
+
+GATEWAY_SUBNET_OCID=$(oci api-gateway gateway get \
+  --gateway-id "$GATEWAY_OCID" \
+  --query 'data."subnet-id"' \
+  --raw-output)
+
+oci api-gateway gateway get \
+  --gateway-id "$GATEWAY_OCID" \
+  --query 'data.{
+    Nombre:"display-name",
+    Estado:"lifecycle-state",
+    Tipo:"endpoint-type",
+    Subred:"subnet-id",
+    Hostname:hostname,
+    NSG:"network-security-group-ids"
+  }' \
+  --output json
+
+printf 'Estado esperado: ACTIVE\nEstado obtenido: %s\nTipo obtenido: %s\nNSG esperado: %s\n' \
+  "$GATEWAY_STATE" \
+  "$GATEWAY_ENDPOINT_TYPE" \
+  "$API_GATEWAY_NSG_OCID"
 ```
 
-Actualice el archivo de ejecución sin depender de la memoria de la terminal:
+No continúe hasta que:
+
+- `GATEWAY_STATE` sea `ACTIVE`;
+- `GATEWAY_ENDPOINT_TYPE` sea `PUBLIC`;
+- `GATEWAY_SUBNET_OCID` coincida con `PUBLIC_SUBNET_OCID`;
+- `GATEWAY_HOSTNAME` no esté vacío;
+- el arreglo `NSG` contenga `API_GATEWAY_NSG_OCID`.
+
+Puede validar automáticamente los tres valores escalares:
+
+```bash
+if [ "$GATEWAY_STATE" = "ACTIVE" ] && \
+   [ "$GATEWAY_ENDPOINT_TYPE" = "PUBLIC" ] && \
+   [ "$GATEWAY_SUBNET_OCID" = "$PUBLIC_SUBNET_OCID" ] && \
+   [ -n "$GATEWAY_HOSTNAME" ] && \
+   [ "$GATEWAY_HOSTNAME" != "null" ]; then
+  echo 'Gateway ACTIVE, público y ubicado en la subred esperada.'
+else
+  echo 'ERROR: el gateway reutilizado no coincide con la configuración del taller.'
+  false
+fi
+```
+
+Guarde los valores:
 
 ```bash
 printf '%s\n' \
@@ -1145,67 +1560,207 @@ printf '%s\n' \
   "API_GATEWAY_NSG_OCID=${API_GATEWAY_NSG_OCID}" \
   "GATEWAY_OCID=${GATEWAY_OCID}" \
   "GATEWAY_HOSTNAME=${GATEWAY_HOSTNAME}" \
-  > config/runtime-resolved.oke.env
+  > runtime-resolved.oke.env
+
+chmod 600 runtime-resolved.oke.env
+```
+
+La validación de F4-4.2 queda completa solamente cuando se cumplen estos tres puntos:
+
+```text
+NSG AVAILABLE → cuatro reglas correctas → NSG asociado a Gateway ACTIVE
 ```
 
 <a id="f4-43"></a>
 
 ## F4-4.3. Crear el deployment del gateway
 
-Cargue los archivos requeridos y renderice el JSON incluido:
+### Cargar y validar la configuración
 
 ```bash
-source config/oci.oke.env
-source config/network-resolved.oke.env
-source config/runtime-resolved.oke.env
-source config/frontend-config.oke.env
+source oci.oke.env
+source network-resolved.oke.env
+source runtime-resolved.oke.env
+source frontend-config.oke.env
 
+printf 'Proyecto Firebase: %s\nGateway: %s\nPrefijo: %s\n' \
+  "$VITE_FIREBASE_PROJECT_ID" \
+  "$GATEWAY_HOSTNAME" \
+  "$API_PATH_PREFIX"
+```
+
+`VITE_FIREBASE_PROJECT_ID` debe contener el ID real del proyecto, no `REEMPLACE_PROJECT_ID`.
+
+Normalice el prefijo para evitar una `/` duplicada al construir la URL:
+
+```bash
+API_PATH_PREFIX="${API_PATH_PREFIX%/}"
+printf 'Prefijo normalizado: %s\n' "$API_PATH_PREFIX"
+```
+
+### Renderizar la especificación
+
+Renderice la plantilla incluida:
+
+```bash
 sed \
   -e "s|__FIREBASE_PROJECT_ID__|${VITE_FIREBASE_PROJECT_ID}|g" \
   -e "s|__FRONTEND_LB_IP__|${FRONTEND_LB_IP}|g" \
   -e "s|__COMPANIES_LB_IP__|${COMPANIES_LB_IP}|g" \
   -e "s|__MATERIALS_LB_IP__|${MATERIALS_LB_IP}|g" \
-  oci/ecored-api-deployment.template.json \
-  > oci/ecored-api-deployment.json
-
-jq empty oci/ecored-api-deployment.json
+  ecored-api-deployment.template.json | \
+  jq '.requestPolicies.cors.isAllowCredentialsEnabled = true' \
+  > ecored-api-deployment.json
 ```
 
-`jq` no muestra salida cuando el JSON es válido. El archivo generado utiliza las tres IP obtenidas en F4-4.1.
+La política CORS usa un origen específico y habilita credenciales porque el navegador envía el token en el encabezado `Authorization`.
 
-Cree el deployment si todavía no existe; si ya existe, actualice su especificación:
+Valide el JSON y compruebe que no queden marcadores:
+
+```bash
+jq empty ecored-api-deployment.json
+
+if grep -n '__[A-Z_]*__' ecored-api-deployment.json; then
+  echo 'ERROR: quedaron marcadores sin reemplazar.'
+else
+  echo 'Especificación válida y completamente renderizada.'
+fi
+```
+
+Revise un resumen sin imprimir tokens ni credenciales:
+
+```bash
+jq '{
+  autenticacion: .requestPolicies.authentication.type,
+  emisores: .requestPolicies.authentication.validationPolicy.additionalValidationPolicy.issuers,
+  audiencias: .requestPolicies.authentication.validationPolicy.additionalValidationPolicy.audiences,
+  cors: .requestPolicies.cors,
+  rutas: [
+    .routes[] | {
+      path: .path,
+      methods: .methods,
+      backend: .backend.url
+    }
+  ]
+}' ecored-api-deployment.json
+```
+
+La especificación debe mostrar:
+
+- autenticación `TOKEN_AUTHENTICATION`;
+- validación `REMOTE_JWKS` de Firebase;
+- emisor `https://securetoken.google.com/<PROJECT_ID>`;
+- audiencia igual al Project ID de Firebase;
+- CORS limitado a `http://<FRONTEND_LB_IP>`;
+- encabezado `X-User-Id` sobrescrito con `${request.auth[sub]}`;
+- rutas hacia las IP privadas de Companies y Materials.
+
+### Crear o actualizar el deployment
+
+Busque el deployment:
 
 ```bash
 DEPLOYMENT_OCID=$(oci api-gateway deployment list \
   --compartment-id "$COMPARTMENT_OCID" \
   --gateway-id "$GATEWAY_OCID" \
   --display-name "$API_DEPLOYMENT_NAME" \
-  --query 'data.items[0].id' --raw-output)
+  --all \
+  --query 'data.items[0].id' \
+  --raw-output)
+```
 
-if [ -z "$DEPLOYMENT_OCID" ] || [ "$DEPLOYMENT_OCID" = "null" ]; then
-  DEPLOYMENT_OCID=$(oci api-gateway deployment create \
+Créelo si no existe. Si ya existe, reemplace su especificación:
+
+```bash
+if [ -z "$DEPLOYMENT_OCID" ] || \
+   [ "$DEPLOYMENT_OCID" = "null" ]; then
+
+  oci api-gateway deployment create \
     --compartment-id "$COMPARTMENT_OCID" \
     --gateway-id "$GATEWAY_OCID" \
     --display-name "$API_DEPLOYMENT_NAME" \
     --path-prefix "$API_PATH_PREFIX" \
-    --specification file://oci/ecored-api-deployment.json \
-    --query 'data.id' --raw-output)
+    --specification file://ecored-api-deployment.json \
+    --wait-for-state SUCCEEDED \
+    > /dev/null
 
-  oci api-gateway deployment get \
-    --deployment-id "$DEPLOYMENT_OCID" \
-    --wait-for-state ACTIVE > /dev/null
+  DEPLOYMENT_OCID=$(oci api-gateway deployment list \
+    --compartment-id "$COMPARTMENT_OCID" \
+    --gateway-id "$GATEWAY_OCID" \
+    --display-name "$API_DEPLOYMENT_NAME" \
+    --all \
+    --query 'data.items[0].id' \
+    --raw-output)
+
+  printf 'Deployment creado: %s\n' "$DEPLOYMENT_OCID"
 else
-  oci api-gateway deployment update \
+  CURRENT_PATH_PREFIX=$(oci api-gateway deployment get \
     --deployment-id "$DEPLOYMENT_OCID" \
-    --specification file://oci/ecored-api-deployment.json \
-    --force \
-    --wait-for-state SUCCEEDED > /dev/null
-fi
+    --query 'data."path-prefix"' \
+    --raw-output)
 
-API_BASE_URL="https://${GATEWAY_HOSTNAME}${API_PATH_PREFIX}/api"
+  if [ "$CURRENT_PATH_PREFIX" != "$API_PATH_PREFIX" ]; then
+    printf 'ERROR: el deployment existente usa el prefijo %s y se esperaba %s.\n' \
+      "$CURRENT_PATH_PREFIX" \
+      "$API_PATH_PREFIX"
+    echo 'El prefijo no se puede cambiar con deployment update. Deténgase y revise el recurso.'
+    false
+  else
+    oci api-gateway deployment update \
+      --deployment-id "$DEPLOYMENT_OCID" \
+      --specification file://ecored-api-deployment.json \
+      --force \
+      --wait-for-state SUCCEEDED \
+      > /dev/null
+
+    printf 'Deployment actualizado: %s\n' "$DEPLOYMENT_OCID"
+  fi
+fi
 ```
 
-Guarde el estado completo para las fases de frontend, pruebas y limpieza:
+> `deployment create` y `deployment update` esperan el estado `SUCCEEDED` de la solicitud de trabajo. `deployment get` se utiliza después para comprobar que el recurso quedó `ACTIVE`.
+
+El prefijo de ruta se define al crear el deployment y no es una opción de `deployment update`. Por eso la guía comprueba el valor antes de reutilizar un deployment existente.
+
+### Verificar el deployment
+
+```bash
+DEPLOYMENT_STATE=$(oci api-gateway deployment get \
+  --deployment-id "$DEPLOYMENT_OCID" \
+  --query 'data."lifecycle-state"' \
+  --raw-output)
+
+oci api-gateway deployment get \
+  --deployment-id "$DEPLOYMENT_OCID" \
+  --query 'data.{
+    Nombre:"display-name",
+    Estado:"lifecycle-state",
+    Prefijo:"path-prefix",
+    Gateway:"gateway-id"
+  }' \
+  --output table
+
+printf 'Estado esperado: ACTIVE\nEstado obtenido: %s\n' \
+  "$DEPLOYMENT_STATE"
+```
+
+No continúe si el estado no es `ACTIVE`.
+
+Construya la URL pública base:
+
+```bash
+API_BASE_URL="https://${GATEWAY_HOSTNAME}${API_PATH_PREFIX}/api"
+
+printf 'URL base de la API: %s\n' "$API_BASE_URL"
+```
+
+El formato esperado es:
+
+```text
+https://<GATEWAY_HOSTNAME>/ecored/api
+```
+
+### Guardar el estado completo
 
 ```bash
 printf '%s\n' \
@@ -1217,68 +1772,192 @@ printf '%s\n' \
   "DEPLOYMENT_OCID=${DEPLOYMENT_OCID}" \
   "GATEWAY_HOSTNAME=${GATEWAY_HOSTNAME}" \
   "API_BASE_URL=${API_BASE_URL}" \
-  > config/runtime-resolved.oke.env
+  > runtime-resolved.oke.env
 
-chmod 600 config/runtime-resolved.oke.env
+chmod 600 runtime-resolved.oke.env
+cat runtime-resolved.oke.env
 ```
 
-La especificación:
+### Probar la autenticación y CORS
 
-1. valida firma, expiración, emisor y audiencia del token Firebase;
-2. sobrescribe `X-User-Id` con `${request.auth[sub]}`;
-3. limita CORS al frontend desplegado;
-4. enruta Companies y Materials hacia sus Load Balancers privados.
-
-Pruebe la protección sin token:
+Pruebe una ruta sin token:
 
 ```bash
 curl -i "${API_BASE_URL}/companies"
 ```
 
-El resultado esperado es `401 Unauthorized`.
+El resultado esperado es:
+
+```text
+HTTP/1.1 401 Unauthorized
+```
+
+Este `401` es correcto: demuestra que el deployment existe, la ruta coincide y API Gateway exige autenticación antes de enviar la solicitud a Companies.
+
+Pruebe la solicitud CORS de preflight:
+
+```bash
+curl -i -X OPTIONS \
+  -H "Origin: http://${FRONTEND_LB_IP}" \
+  -H 'Access-Control-Request-Method: GET' \
+  -H 'Access-Control-Request-Headers: Authorization,Content-Type' \
+  "${API_BASE_URL}/companies"
+```
+
+La respuesta debe ser exitosa y contener un encabezado equivalente a:
+
+```text
+Access-Control-Allow-Origin: http://<FRONTEND_LB_IP>
+```
+
+La especificación del deployment realiza cuatro funciones:
+
+1. valida la firma, expiración, emisor y audiencia del token Firebase;
+2. sobrescribe `X-User-Id` con el claim autenticado `sub`;
+3. limita CORS al origen del frontend;
+4. enruta Companies y Materials hacia sus Load Balancers privados.
 
 ```mermaid
 sequenceDiagram
-    participant B as "Navegador"
-    participant F as "Firebase"
-    participant G as "OCI API Gateway"
-    participant C as "Companies"
+    participant B as Navegador
+    participant F as Firebase
+    participant G as OCI API Gateway
+    participant C as Companies
 
     B->>F: correo y contraseña
     F-->>B: ID token
-    B->>G: POST /companies + Bearer token
-    G->>G: validar JWT y obtener sub
-    G->>C: POST + X-User-Id verificado
-    C-->>B: 201 + empresa
+    B->>G: petición + Bearer token
+    G->>G: validar firma, iss, aud, exp y sub
+    G->>C: petición + X-User-Id verificado
+    C-->>G: respuesta
+    G-->>B: respuesta HTTPS
 ```
 
 <a id="f4-44"></a>
 
 ## F4-4.4. Inyectar la URL del gateway en el frontend
 
-Actualice el archivo, no el manifiesto ni la imagen:
+### Actualizar la configuración del frontend
+
+La imagen del frontend no se recompila. Se modifica su configuración de ejecución:
 
 ```bash
-source config/runtime-resolved.oke.env
+source runtime-resolved.oke.env
 
 sed -i \
   "s|^VITE_API_URL=.*|VITE_API_URL=${API_BASE_URL}|" \
-  config/frontend-config.oke.env
+  frontend-config.oke.env
 
-kubectl create configmap frontend-config \
-  --namespace ecored \
-  --from-env-file=config/frontend-config.oke.env \
-  --dry-run=client -o yaml | kubectl apply -f -
-
-kubectl rollout restart deployment/ecored-frontend -n ecored
-kubectl rollout status deployment/ecored-frontend -n ecored
+grep '^VITE_API_URL=' frontend-config.oke.env
 ```
 
-Nginx genera nuevamente `runtime-config.js` al iniciar. No se recompila React.
+La salida debe coincidir con:
 
-> **12 factores — III y V.** La misma imagen del frontend recibe la URL del ambiente durante la ejecución; cambiar ConfigMap no crea una nueva imagen.
+```text
+VITE_API_URL=https://<GATEWAY_HOSTNAME>/ecored/api
+```
+
+### Aplicar el ConfigMap y reiniciar el frontend
+
+```bash
+kubectl create configmap frontend-config \
+  --namespace ecored \
+  --from-env-file=frontend-config.oke.env \
+  --dry-run=client \
+  -o yaml | kubectl apply -f -
+
+kubectl rollout restart deployment/ecored-frontend \
+  -n ecored
+
+kubectl rollout status deployment/ecored-frontend \
+  -n ecored \
+  --timeout=5m
+```
+
+Compruebe los Pods:
+
+```bash
+kubectl get deployment,pods \
+  -n ecored \
+  -l app=ecored-frontend \
+  -o wide
+```
+
+El Deployment debe mostrar `2/2` réplicas disponibles.
+
+### Verificar `runtime-config.js`
+
+El entrypoint de Nginx genera nuevamente `runtime-config.js` cuando inicia cada Pod. Compruebe el archivo servido públicamente:
+
+```bash
+curl -fsS \
+  "http://${FRONTEND_LB_IP}/runtime-config.js"
+```
+
+Verifique específicamente la URL:
+
+```bash
+curl -fsS \
+  "http://${FRONTEND_LB_IP}/runtime-config.js" | \
+  grep -F "$API_BASE_URL"
+```
+
+El comando debe mostrar una línea que contenga la URL HTTPS de API Gateway.
+
+Abra finalmente:
+
+```text
+http://<FRONTEND_LB_IP>
+```
+
+Compruebe en el navegador:
+
+1. la interfaz se carga;
+2. Firebase permite iniciar sesión desde el dominio autorizado;
+3. DevTools → Network muestra llamadas a `https://<GATEWAY_HOSTNAME>/ecored/api/...`;
+4. el navegador nunca llama directamente a las IP privadas de Companies o Materials.
+
+### Diagnóstico rápido de la Fase 4
+
+| Resultado | Causa probable | Verificación |
+|---|---|---|
+| `401 Unauthorized` sin token | Comportamiento correcto | API Gateway está protegiendo la ruta. |
+| `500` durante autenticación | No se pudieron consultar las claves JWKS | Revise egress TCP 443, la ruta a Internet y el Project ID de Firebase. |
+| `502` o `504` | Gateway no alcanza el backend privado | Revise las reglas 8001/8002, las IP renderizadas y la salud de los Load Balancers. |
+| Error CORS en el navegador | El origen no coincide | Compare `http://<FRONTEND_LB_IP>` con `allowedOrigins`. |
+| Firebase rechaza el dominio | El frontend no está autorizado | Registre únicamente la IP o dominio, sin protocolo, puerto ni ruta. |
+| `runtime-config.js` conserva `pending.invalid` | El ConfigMap o los Pods no se actualizaron | Revise el archivo, vuelva a aplicar el ConfigMap y repita el rollout. |
+
+### Lista de control de la Fase 4
+
+- [ ] Companies y Materials tienen IP privadas.
+- [ ] El frontend tiene IP pública.
+- [ ] Companies volvió a `2/2` después de actualizar su ConfigMap.
+- [ ] El dominio público del frontend está autorizado en Firebase.
+- [ ] `ecored-api-gateway-nsg` está `AVAILABLE`.
+- [ ] El NSG tiene exactamente cuatro reglas correctas.
+- [ ] OCI API Gateway está `ACTIVE`.
+- [ ] El NSG está asociado con OCI API Gateway.
+- [ ] El deployment `ecored-api-v1` está `ACTIVE`.
+- [ ] La llamada sin token devuelve `401`.
+- [ ] La prueba CORS devuelve el origen del frontend.
+- [ ] `runtime-config.js` contiene `API_BASE_URL`.
+- [ ] El frontend volvió a `2/2` después del rollout.
+
+> **12 factores — III y V.** La misma imagen del frontend recibe la URL del ambiente mediante configuración externa durante la ejecución. Cambiar el ConfigMap no requiere reconstruir la imagen.
+
+### Referencias oficiales específicas
+
+- [Creación de OCI API Gateway](https://docs.oracle.com/en-us/iaas/Content/APIGateway/Tasks/apigatewaycreatinggateway.htm)
+- [Actualización de OCI API Gateway](https://docs.oracle.com/en-us/iaas/Content/APIGateway/Tasks/apigatewayupdating.htm)
+- [Creación de deployments](https://docs.oracle.com/en-us/iaas/Content/APIGateway/Tasks/apigatewaycreatingdeployment.htm)
+- [Autenticación de tokens con Remote JWKS](https://docs.oracle.com/en-us/iaas/Content/APIGateway/Tasks/apigatewayusingjwttokens-usinjson.htm)
+- [CORS en API Gateway](https://docs.oracle.com/en-us/iaas/Content/APIGateway/Tasks/apigatewayaddingcorssupport.htm)
+- [Transformación de encabezados](https://docs.oracle.com/en-us/iaas/Content/APIGateway/Tasks/apigatewaymodifyingresponsesrequests-transformexamples.htm)
 
 [↑ Volver al índice](#indice)
+
+
 
 ---
 
