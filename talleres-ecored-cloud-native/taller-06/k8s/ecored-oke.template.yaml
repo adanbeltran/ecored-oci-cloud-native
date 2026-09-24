@@ -39,18 +39,27 @@ spec:
             httpGet:
               path: /api/health
               port: http
+              httpHeaders:
+                - name: Host
+                  value: ecored-companies
             periodSeconds: 5
             failureThreshold: 30
           readinessProbe:
             httpGet:
               path: /api/health
               port: http
+              httpHeaders:
+                - name: Host
+                  value: ecored-companies
             periodSeconds: 10
             failureThreshold: 3
           livenessProbe:
             httpGet:
               path: /api/health
               port: http
+              httpHeaders:
+                - name: Host
+                  value: ecored-companies
             periodSeconds: 20
             failureThreshold: 3
           resources:
@@ -281,4 +290,3 @@ spec:
   selector:
     matchLabels:
       app: ecored-frontend
-

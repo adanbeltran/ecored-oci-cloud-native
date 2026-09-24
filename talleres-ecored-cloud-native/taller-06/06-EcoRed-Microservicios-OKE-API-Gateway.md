@@ -876,6 +876,7 @@ La plantilla ya incluye dos réplicas, probes, recursos, actualización gradual,
 ```bash
 kubectl get deployments,pods,services,pdb -n ecored -o wide
 ```
+![alt text](image-17.png)
 
 Resultado esperado:
 
@@ -884,28 +885,41 @@ Resultado esperado:
 - frontend con una dirección pública;
 - tres PDB con `minAvailable: 1`.
 
-Compruebe los Services desde un Pod temporal:
+### Comprobar la comunicación interna entre los Services
+
+Utilice un Pod del frontend para comprobar el DNS y la comunicación interna de Kubernetes.
+
+**Compruebe Companies:**
 
 ```bash
-kubectl run ecored-diagnostic \
-  --namespace ecored \
-  --rm -it \
-  --restart=Never \
-  --image=curlimages/curl:8.12.1 \
-  -- sh
+kubectl exec -n ecored deployment/ecored-frontend -- \
+  sh -c 'wget -S -O- http://ecored-companies:8001/api/health 2>&1'
+```
+![alt text](image-18.png)
+
+**Compruebe Materials:**
+
+```bash
+kubectl exec -n ecored deployment/ecored-frontend -- \
+  sh -c 'wget -S -O- http://ecored-materials:8002/api/health 2>&1'
+```
+![alt text](image-19.png)
+
+En ambos casos debe aparecer:
+
+```text
+HTTP/1.1 200 OK
 ```
 
-Dentro del Pod:
+Esta prueba verifica el siguiente recorrido:
 
-```sh
-curl -i http://ecored-companies:8001/api/health
-curl -i http://ecored-materials:8002/api/health
-exit
+```text
+Pod frontend → DNS de Kubernetes → Service → Pod del microservicio
 ```
 
-Ambas respuestas deben ser `200`.
+> Esta comprobación valida la comunicación interna del clúster. No prueba todavía API Gateway ni los Load Balancers de OCI.
 
-> **12 factores — XII. Procesos administrativos.** El Pod temporal ejecuta una comprobación puntual en el mismo ambiente y desaparece al terminar.
+
 
 [↑ Volver al índice](#indice)
 
@@ -930,6 +944,7 @@ FRONTEND_LB_IP=$(kubectl get service ecored-frontend \
 printf 'Companies privado: %s\nMaterials privado: %s\nFrontend público: %s\n' \
   "$COMPANIES_LB_IP" "$MATERIALS_LB_IP" "$FRONTEND_LB_IP"
 ```
+![alt text](image-20.png)
 
 Companies y Materials deben tener IP privadas y frontend una IP pública. Si algún valor está vacío, espere el aprovisionamiento del Service antes de continuar.
 
@@ -940,18 +955,23 @@ printf '%s\n' \
   "COMPANIES_LB_IP=${COMPANIES_LB_IP}" \
   "MATERIALS_LB_IP=${MATERIALS_LB_IP}" \
   "FRONTEND_LB_IP=${FRONTEND_LB_IP}" \
-  > config/runtime-resolved.oke.env
+  > runtime-resolved.oke.env
 
-chmod 600 config/runtime-resolved.oke.env
+chmod 600 runtime-resolved.oke.env
+cat runtime-resolved.oke.env 
 ```
-
+![alt text](image-21.png)
 Actualice el archivo de Companies y vuelva a aplicar el ConfigMap:
 
 ```bash
 sed -i \
   "s|^DJANGO_ALLOWED_HOSTS=.*|DJANGO_ALLOWED_HOSTS=ecored-companies,${COMPANIES_LB_IP},localhost,127.0.0.1|" \
-  config/companies-config.oke.env
+  companies-config.oke.env
+  cat companies-config.oke.env 
+```
+![alt text](image-22.png)
 
+```bash
 kubectl create configmap companies-config \
   --namespace ecored \
   --from-env-file=config/companies-config.oke.env \
@@ -960,10 +980,12 @@ kubectl create configmap companies-config \
 kubectl rollout restart deployment/ecored-companies -n ecored
 kubectl rollout status deployment/ecored-companies -n ecored
 ```
-
+![alt text](image-23.png)
 No utilice `DJANGO_ALLOWED_HOSTS=*`.
 
 Agregue la IP o el dominio público del frontend en **Firebase Authentication → Configuración → Dominios autorizados**, sin protocolo, puerto ni ruta.
+
+![alt text](image-24.png)
 
 <a id="f4-42"></a>
 
