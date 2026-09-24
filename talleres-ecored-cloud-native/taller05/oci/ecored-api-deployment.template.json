@@ -1,0 +1,91 @@
+{
+  "requestPolicies": {
+    "authentication": {
+      "type": "TOKEN_AUTHENTICATION",
+      "tokenHeader": "Authorization",
+      "tokenAuthScheme": "Bearer",
+      "isAnonymousAccessAllowed": false,
+      "maxClockSkewInSeconds": 30,
+      "validationPolicy": {
+        "type": "REMOTE_JWKS",
+        "uri": "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
+        "isSslVerifyDisabled": false,
+        "maxCacheDurationInHours": 1,
+        "additionalValidationPolicy": {
+          "issuers": [
+            "https://securetoken.google.com/__FIREBASE_PROJECT_ID__"
+          ],
+          "audiences": [
+            "__FIREBASE_PROJECT_ID__"
+          ],
+          "verifyClaims": [
+            {
+              "key": "sub",
+              "isRequired": true
+            }
+          ]
+        }
+      }
+    },
+    "headerTransformations": {
+      "setHeaders": {
+        "items": [
+          {
+            "name": "X-User-Id",
+            "values": ["${request.auth[sub]}"],
+            "ifExists": "OVERWRITE"
+          },
+          {
+            "name": "X-User-Email",
+            "values": ["${request.auth[email]}"],
+            "ifExists": "OVERWRITE"
+          }
+        ]
+      }
+    },
+    "cors": {
+      "allowedOrigins": [
+        "http://__FRONTEND_LB_IP__"
+      ],
+      "allowedMethods": ["GET", "POST", "OPTIONS"],
+      "allowedHeaders": ["Authorization", "Content-Type"],
+      "exposedHeaders": [],
+      "isAllowCredentialsEnabled": false,
+      "maxAgeInSeconds": 3600
+    }
+  },
+  "routes": [
+    {
+      "path": "/api/companies",
+      "methods": ["GET", "POST"],
+      "backend": {
+        "type": "HTTP_BACKEND",
+        "url": "http://__COMPANIES_LB_IP__:8001/api/companies"
+      }
+    },
+    {
+      "path": "/api/companies/{companyId}",
+      "methods": ["GET"],
+      "backend": {
+        "type": "HTTP_BACKEND",
+        "url": "http://__COMPANIES_LB_IP__:8001/api/companies/${request.path[companyId]}"
+      }
+    },
+    {
+      "path": "/api/materials",
+      "methods": ["GET", "POST"],
+      "backend": {
+        "type": "HTTP_BACKEND",
+        "url": "http://__MATERIALS_LB_IP__:8002/api/materials"
+      }
+    },
+    {
+      "path": "/api/materials/{materialId}",
+      "methods": ["GET"],
+      "backend": {
+        "type": "HTTP_BACKEND",
+        "url": "http://__MATERIALS_LB_IP__:8002/api/materials/${request.path[materialId]}"
+      }
+    }
+  ]
+}
