@@ -1028,43 +1028,85 @@ cat api-gateway-nsg-rules.json
 ```
 <img width="672" height="573" alt="image" src="https://github.com/user-attachments/assets/3e719949-2da7-45bd-be4f-41a89443528b" />
 
+### Verificar el NSG de API Gateway
 
-Cree el NSG solamente si todavía no existe:
+Compruebe que el NSG exista y se encuentre disponible:
 
 ```bash
-API_GATEWAY_NSG_OCID=$(oci network nsg list \
-  --compartment-id "$COMPARTMENT_OCID" \
-  --vcn-id "$VCN_OCID" \
-  --display-name "$API_GATEWAY_NSG_NAME" \
-  --query 'data[0].id' --raw-output)
-
-if [ -z "$API_GATEWAY_NSG_OCID" ] || [ "$API_GATEWAY_NSG_OCID" = "null" ]; then
-  API_GATEWAY_NSG_OCID=$(oci network nsg create \
-    --compartment-id "$COMPARTMENT_OCID" \
-    --vcn-id "$VCN_OCID" \
-    --display-name "$API_GATEWAY_NSG_NAME" \
-    --query 'data.id' --raw-output)
-
-  oci network nsg rules add \
-    --nsg-id "$API_GATEWAY_NSG_OCID" \
-    --security-rules file://oci/api-gateway-nsg-rules.json
-else
-  echo "Se reutilizará el NSG existente: ${API_GATEWAY_NSG_NAME}"
-fi
+oci network nsg get \
+  --nsg-id "$API_GATEWAY_NSG_OCID" \
+  --query 'data.{Nombre:"display-name",Estado:"lifecycle-state",OCID:id}' \
+  --output table
 ```
 
-Compruebe las reglas antes de crear el gateway:
+El resultado esperado debe mostrar:
+
+```text
+Nombre: ecored-api-gateway-nsg
+Estado: AVAILABLE
+```
+
+Compruebe la cantidad de reglas configuradas:
+
+```bash
+NSG_RULE_COUNT=$(oci network nsg rules list \
+  --nsg-id "$API_GATEWAY_NSG_OCID" \
+  --all \
+  --query 'length(data)' \
+  --raw-output)
+
+printf 'Reglas configuradas en el NSG: %s\n' "$NSG_RULE_COUNT"
+```
+
+El resultado esperado es:
+
+```text
+Reglas configuradas en el NSG: 4
+```
+
+Liste las reglas para verificar su configuración:
 
 ```bash
 oci network nsg rules list \
   --nsg-id "$API_GATEWAY_NSG_OCID" \
   --all \
+  --query 'data[].{
+    Direccion:direction,
+    Protocolo:protocol,
+    Origen:source,
+    Destino:destination,
+    Descripcion:description
+  }' \
   --output table
 ```
 
-Si el NSG ya existía, confirme que contiene las cuatro reglas de la tabla. No vuelva a ejecutar `rules add` sobre un NSG correctamente configurado porque duplicaría reglas.
+Deben aparecer cuatro reglas:
 
-Busque el gateway por el nombre guardado en `config/oci.oke.env` y créelo únicamente si no existe:
+1. Entrada TCP 443 desde Internet.
+2. Salida TCP 8001 hacia Companies.
+3. Salida TCP 8002 hacia Materials.
+4. Salida TCP 443 para consultar Firebase.
+
+
+Después de crear API Gateway, compruebe también que el NSG quedó asociado:
+
+```bash
+oci api-gateway gateway get \
+  --gateway-id "$GATEWAY_OCID" \
+  --query 'data.{
+    Nombre:"display-name",
+    Estado:"lifecycle-state",
+    NSG:"network-security-group-ids"
+  }' \
+  --output json
+```
+El campo NSG debe contener el mismo valor almacenado en:
+```bash
+printf '%s\n' "$API_GATEWAY_NSG_OCID"
+```
+De esta manera se validan tres aspectos diferentes:
+
+NSG creado → cuatro reglas configuradas → NSG asociado a API Gateway
 
 ```bash
 GATEWAY_OCID=$(oci api-gateway gateway list \
