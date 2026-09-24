@@ -994,9 +994,9 @@ Agregue la IP o el dominio público del frontend en **Firebase Authentication �
 Cargue los archivos generados hasta este punto:
 
 ```bash
-source config/oci.oke.env
-source config/network-resolved.oke.env
-source config/runtime-resolved.oke.env
+source oci.oke.env
+source network-resolved.oke.env
+source runtime-resolved.oke.env
 ```
 
 Renderice el archivo de reglas. Aquí se utiliza `PRIVATE_SUBNET_CIDR`, obtenido en F2-2.2:
@@ -1004,11 +1004,13 @@ Renderice el archivo de reglas. Aquí se utiliza `PRIVATE_SUBNET_CIDR`, obtenido
 ```bash
 sed \
   "s|__PRIVATE_SUBNET_CIDR__|${PRIVATE_SUBNET_CIDR}|g" \
-  oci/api-gateway-nsg-rules.template.json \
-  > oci/api-gateway-nsg-rules.json
+  api-gateway-nsg-rules.template.json \
+  > api-gateway-nsg-rules.json
 
-jq empty oci/api-gateway-nsg-rules.json
+jq empty api-gateway-nsg-rules.json
 ```
+<img width="711" height="143" alt="image" src="https://github.com/user-attachments/assets/06f1bfb6-d95f-4a85-8cda-cefa972da0f1" />
+
 
 El archivo define estas reglas **stateful**:
 
@@ -1018,6 +1020,14 @@ El archivo define estas reglas **stateful**:
 | Egress | CIDR de `ecored-workloads-private` | TCP 8001 | Llegar al LB privado de Companies. |
 | Egress | CIDR de `ecored-workloads-private` | TCP 8002 | Llegar al LB privado de Materials. |
 | Egress | `0.0.0.0/0` | TCP 443 | Consultar JWKS de Firebase. |
+
+Consulte el archivo api-gateway-nsg-rules.json
+
+```bash
+cat api-gateway-nsg-rules.json
+```
+<img width="672" height="573" alt="image" src="https://github.com/user-attachments/assets/3e719949-2da7-45bd-be4f-41a89443528b" />
+
 
 Cree el NSG solamente si todavía no existe:
 
