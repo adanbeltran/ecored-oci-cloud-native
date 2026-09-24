@@ -948,6 +948,8 @@ kubectl get deployments,pods,services,pdb \
   -n ecored \
   -o wide
 ```
+<img width="1472" height="526" alt="image" src="https://github.com/user-attachments/assets/8aea01ff-81d8-420e-8460-282e81b55f83" />
+
 
 El resultado esperado es:
 
@@ -980,6 +982,8 @@ done
 
 printf 'Archivos faltantes: %s\n' "$PHASE4_FILE_ERRORS"
 ```
+<img width="872" height="547" alt="image" src="https://github.com/user-attachments/assets/576bcc00-58fc-4795-8852-baf7431f37d0" />
+
 
 El resultado debe finalizar con:
 
@@ -1015,41 +1019,15 @@ printf 'Companies privado: %s\nMaterials privado: %s\nFrontend público: %s\n' \
   "$MATERIALS_LB_IP" \
   "$FRONTEND_LB_IP"
 ```
+<img width="1096" height="428" alt="image" src="https://github.com/user-attachments/assets/716d2c74-2924-4b56-b604-c598ae7f2ab4" />
 
-Valide que ninguna dirección esté vacía:
-
-```bash
-LB_IP_ERRORS=0
-
-for VARIABLE in \
-  COMPANIES_LB_IP \
-  MATERIALS_LB_IP \
-  FRONTEND_LB_IP; do
-
-  VALUE="${!VARIABLE}"
-
-  if [ -z "$VALUE" ] || [ "$VALUE" = "null" ]; then
-    printf 'ERROR: %s está vacía.\n' "$VARIABLE"
-    LB_IP_ERRORS=$((LB_IP_ERRORS + 1))
-  else
-    printf 'OK: %-20s %s\n' "$VARIABLE" "$VALUE"
-  fi
-done
-
-printf 'Errores encontrados: %s\n' "$LB_IP_ERRORS"
-```
-
-El resultado debe finalizar con:
-
-```text
-Errores encontrados: 0
-```
 
 Companies y Materials deben mostrar direcciones privadas; el frontend debe mostrar una dirección pública. Si alguna dirección está vacía, espere el aprovisionamiento y vuelva a consultar:
 
 ```bash
 kubectl get services -n ecored -o wide
 ```
+<img width="1012" height="131" alt="image" src="https://github.com/user-attachments/assets/d3bd4bbc-9177-48d6-b1d3-1f0f950f1d0f" />
 
 ### Guardar las IP resueltas
 
@@ -1065,8 +1043,7 @@ printf '%s\n' \
 chmod 600 runtime-resolved.oke.env
 cat runtime-resolved.oke.env
 ```
-
-Este archivo no contiene contraseñas, pero sí direcciones de infraestructura. No publique una captura con información que no sea necesaria para la evidencia.
+<img width="687" height="247" alt="image" src="https://github.com/user-attachments/assets/a9647117-560b-475a-a5a3-07b2b4748142" />
 
 ### Ajustar `DJANGO_ALLOWED_HOSTS` y CORS
 
@@ -1085,6 +1062,8 @@ sed -i \
 grep -E '^(DJANGO_ALLOWED_HOSTS|CORS_ALLOWED_ORIGINS)=' \
   companies-config.oke.env
 ```
+<img width="1112" height="246" alt="image" src="https://github.com/user-attachments/assets/96377de3-d7b8-4ac0-be93-dbcb2aeb1433" />
+
 
 La salida debe mostrar los valores actualizados. Por ejemplo:
 
@@ -1113,6 +1092,9 @@ kubectl rollout status deployment/ecored-companies \
   -n ecored \
   --timeout=5m
 ```
+<img width="981" height="467" alt="image" src="https://github.com/user-attachments/assets/e3eb0d04-80d4-47de-9692-05d20dde6af5" />
+
+
 
 Compruebe el resultado:
 
@@ -1122,6 +1104,7 @@ kubectl get deployment,pods \
   -l app=ecored-companies \
   -o wide
 ```
+<img width="1467" height="222" alt="image" src="https://github.com/user-attachments/assets/4964d243-f255-44bb-92f8-5c7d648da454" />
 
 El Deployment debe mostrar `2/2` réplicas disponibles y los dos Pods deben aparecer `1/1 Running`.
 
@@ -1129,8 +1112,9 @@ Vuelva a comprobar la comunicación interna:
 
 ```bash
 kubectl exec -n ecored deployment/ecored-frontend -- \
-  sh -c 'wget -qO- http://ecored-companies:8001/api/health'
+  sh -c 'wget -qO- http://ecored-companies:8001/api/health; printf "\n"'
 ```
+<img width="883" height="90" alt="image" src="https://github.com/user-attachments/assets/e929e57e-c667-45ce-8981-cd399ab39d99" />
 
 El resultado esperado es:
 
@@ -1145,24 +1129,11 @@ Muestre el valor que debe registrar:
 ```bash
 printf 'Dominio autorizado en Firebase: %s\n' "$FRONTEND_LB_IP"
 ```
+<img width="983" height="87" alt="image" src="https://github.com/user-attachments/assets/b5bf9569-8bdf-4e08-86ea-eb75f64db7c0" />
 
 En **Firebase Authentication → Configuración → Dominios autorizados**, agregue la IP o el dominio público utilizado para abrir el frontend.
 
-Registre únicamente el host:
-
-- sin `http://` ni `https://`;
-- sin puerto;
-- sin ruta;
-- no agregue la IP privada de Companies;
-- no agregue la IP privada de Materials;
-- no agregue el hostname de API Gateway como dominio del frontend.
-
-La diferencia es importante:
-
-| Configuración | Formato esperado |
-|---|---|
-| Firebase, dominio autorizado | `163.176.x.x` o `app.ejemplo.com` |
-| CORS, origen autorizado | `http://163.176.x.x` o `https://app.ejemplo.com` |
+<img width="1502" height="687" alt="image" src="https://github.com/user-attachments/assets/bc3dc96b-bed9-461a-ad13-c53fe6732a03" />
 
 <a id="f4-42"></a>
 
@@ -1217,6 +1188,7 @@ done
 
 printf 'Errores encontrados: %s\n' "$PHASE4_VARIABLE_ERRORS"
 ```
+<img width="938" height="527" alt="image" src="https://github.com/user-attachments/assets/b5cd9707-d794-42af-af4c-e8b675d5db6c" />
 
 El resultado debe finalizar con:
 
@@ -1242,6 +1214,8 @@ else
   echo 'Archivo de reglas válido y completamente renderizado.'
 fi
 ```
+<img width="902" height="288" alt="image" src="https://github.com/user-attachments/assets/77a727c2-29d2-4b88-a552-47b6dce669fc" />
+
 
 `jq empty` no muestra salida cuando el JSON es válido.
 
@@ -1250,6 +1224,7 @@ Revise las reglas generadas:
 ```bash
 jq . api-gateway-nsg-rules.json
 ```
+<img width="412" height="592" alt="image" src="https://github.com/user-attachments/assets/0d4dbccd-dbf3-4f74-b346-9140745bdf21" />
 
 El archivo debe contener cuatro reglas stateful:
 
@@ -1275,6 +1250,7 @@ API_GATEWAY_NSG_OCID=$(oci network nsg list \
   --query 'data[0].id' \
   --raw-output)
 ```
+<img width="710" height="167" alt="image" src="https://github.com/user-attachments/assets/a09e241e-ca1b-4cdd-b255-878f10b0882a" />
 
 Si no existe, créelo. Si ya existe, reutilice su OCID:
 
@@ -1296,6 +1272,7 @@ else
     "$API_GATEWAY_NSG_OCID"
 fi
 ```
+<img width="985" height="345" alt="image" src="https://github.com/user-attachments/assets/774bec95-0a5e-4deb-a684-50b6815afb76" />
 
 Un resultado vacío en la primera consulta es normal cuando se ejecuta el taller por primera vez: significa que el NSG todavía no existe.
 
@@ -1313,6 +1290,7 @@ NSG_RULE_COUNT=$(oci network nsg rules list \
 printf 'Reglas encontradas antes de aplicar: %s\n' \
   "$NSG_RULE_COUNT"
 ```
+<img width="781" height="217" alt="image" src="https://github.com/user-attachments/assets/2cb37944-a7ef-4f5c-b1bd-1030cbaf78c0" />
 
 Aplique el archivo únicamente si el NSG está vacío:
 
