@@ -1326,8 +1326,28 @@ oci network nsg get \
   }' \
   --output table
 ```
+<img width="782" height="298" alt="image" src="https://github.com/user-attachments/assets/ff4c0b89-4bf2-4258-8573-5e65c1405622" />
+
 
 El nombre debe ser `ecored-api-gateway-nsg` y el estado debe ser `AVAILABLE`.
+
+Agregue las cuatro reglas una sola vez:
+```bash
+oci network nsg rules add \
+  --nsg-id "$API_GATEWAY_NSG_OCID" \
+  --security-rules file://api-gateway-nsg-rules.json
+```
+<img width="617" height="590" alt="image" src="https://github.com/user-attachments/assets/ec55ac74-53f9-4eaf-91e5-e085bf11af42" />
+
+Después verifique:
+```bash
+oci network nsg rules list \
+  --nsg-id "$API_GATEWAY_NSG_OCID" \
+  --all \
+  --output json
+```
+<img width="617" height="566" alt="image" src="https://github.com/user-attachments/assets/787ba024-9a1c-4568-8520-c3ab5456f363" />
+
 
 Compruebe la cantidad final:
 
@@ -1341,6 +1361,8 @@ NSG_RULE_COUNT=$(oci network nsg rules list \
 printf 'Reglas configuradas en el NSG: %s\n' \
   "$NSG_RULE_COUNT"
 ```
+<img width="726" height="237" alt="image" src="https://github.com/user-attachments/assets/4a901205-878b-4a13-ae65-e88b6fd0d896" />
+
 
 El resultado esperado es:
 
@@ -1366,6 +1388,9 @@ oci network nsg rules list \
   }' \
   --output table
 ```
+<img width="1152" height="451" alt="image" src="https://github.com/user-attachments/assets/1eca9992-5775-42e4-8a7b-7ede9d3a81f4" />
+
+
 
 En la salida:
 
@@ -1390,6 +1415,8 @@ SINGLE_GATEWAY_NSG_IDS=$(jq -cn \
   --arg id "$API_GATEWAY_NSG_OCID" \
   '[$id]')
 ```
+<img width="720" height="243" alt="image" src="https://github.com/user-attachments/assets/beb93a9c-757b-4ecb-826d-bad2c5a9bb64" />
+
 
 Si no existe, créelo como gateway público en la subred pública y espere a que la solicitud de trabajo finalice:
 
@@ -1419,6 +1446,8 @@ else
     "$GATEWAY_OCID"
 fi
 ```
+<img width="958" height="526" alt="image" src="https://github.com/user-attachments/assets/49bcea9d-6766-4e7a-b88a-5c6238bd8d2e" />
+
 
 > En la versión actual de OCI CLI, `gateway create` espera estados de la solicitud de trabajo, como `SUCCEEDED`. El comando `gateway get` solamente consulta el recurso y no acepta `--wait-for-state`.
 
