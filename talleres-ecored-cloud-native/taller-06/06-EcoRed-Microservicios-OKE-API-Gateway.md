@@ -1623,100 +1623,190 @@ printf 'Proyecto Firebase: %s\nGateway: %s\nPrefijo: %s\n' \
 Renderice la plantilla incluida:
 
 ```bash
-sed \
-  -e "s|__COMPANIES_LB_IP__|${COMPANIES_LB_IP}|g" \
-  -e "s|__MATERIALS_LB_IP__|${MATERIALS_LB_IP}|g" \
-  -e "s|__FRONTEND_LB_IP__|${FRONTEND_LB_IP}|g" \
-  -e "s|__FIREBASE_PROJECT_ID__|${VITE_FIREBASE_PROJECT_ID}|g" \
-  ecored-api-deployment.template.json \
-| jq \
-  --arg FIREBASE_PROJECT_ID "$VITE_FIREBASE_PROJECT_ID" \
-  --arg FRONTEND_LB_IP "$FRONTEND_LB_IP" '
+cat > ecored-api-deployment.json <<EOF
 {
-  routes: [
-    .routes[] |
-    {
-      path: .path,
-      methods: .methods,
-
-      requestPolicies: {
-
-        authentication: {
-          type: "TOKEN_AUTHENTICATION",
-          tokenHeader: "Authorization",
-          tokenAuthScheme: "Bearer",
-          isAnonymousAccessAllowed: false,
-          maxClockSkewInSeconds: 30,
-
-          validationPolicy: {
-            type: "REMOTE_JWKS",
-            uri: "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
-            isSslVerifyDisabled: false,
-            maxCacheDurationInHours: 1,
-
-            additionalValidationPolicy: {
-              issuers: [
-                ("https://securetoken.google.com/" + $FIREBASE_PROJECT_ID)
-              ],
-              audiences: [
-                $FIREBASE_PROJECT_ID
-              ],
-              verifyClaims: [
-                {
-                  key: "sub",
-                  isRequired: true
-                }
-              ]
+  "requestPolicies": {
+    "authentication": {
+      "type": "TOKEN_AUTHENTICATION",
+      "tokenHeader": "Authorization",
+      "tokenAuthScheme": "Bearer",
+      "isAnonymousAccessAllowed": false,
+      "maxClockSkewInSeconds": 30,
+      "validationPolicy": {
+        "type": "REMOTE_JWKS",
+        "uri": "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
+        "isSslVerifyDisabled": false,
+        "maxCacheDurationInHours": 1,
+        "additionalValidationPolicy": {
+          "issuers": [
+            "https://securetoken.google.com/${VITE_FIREBASE_PROJECT_ID}"
+          ],
+          "audiences": [
+            "${VITE_FIREBASE_PROJECT_ID}"
+          ],
+          "verifyClaims": [
+            {
+              "key": "sub",
+              "isRequired": true
             }
-          }
-        },
-
-        headerTransformations: {
-          setHeaders: {
-            items: [
+          ]
+        }
+      }
+    },
+    "cors": {
+      "allowedOrigins": [
+        "http://${FRONTEND_LB_IP}"
+      ],
+      "allowedMethods": [
+        "GET",
+        "POST",
+        "OPTIONS"
+      ],
+      "allowedHeaders": [
+        "Authorization",
+        "Content-Type"
+      ],
+      "exposedHeaders": [],
+      "isAllowCredentialsEnabled": true,
+      "maxAgeInSeconds": 3600
+    }
+  },
+  "routes": [
+    {
+      "path": "/api/companies",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "requestPolicies": {
+        "headerTransformations": {
+          "setHeaders": {
+            "items": [
               {
-                name: "X-User-Id",
-                values: [
-                  "${request.auth[sub]}"
+                "name": "X-User-Id",
+                "values": [
+                  "\${request.auth[sub]}"
                 ],
-                ifExists: "OVERWRITE"
+                "ifExists": "OVERWRITE"
               },
               {
-                name: "X-User-Email",
-                values: [
-                  "${request.auth[email]}"
+                "name": "X-User-Email",
+                "values": [
+                  "\${request.auth[email]}"
                 ],
-                ifExists: "OVERWRITE"
+                "ifExists": "OVERWRITE"
               }
             ]
           }
-        },
-
-        cors: {
-          allowedOrigins: [
-            ("http://" + $FRONTEND_LB_IP)
-          ],
-          allowedMethods: [
-            "GET",
-            "POST",
-            "OPTIONS"
-          ],
-          allowedHeaders: [
-            "Authorization",
-            "Content-Type"
-          ],
-          exposedHeaders: [],
-          isAllowCredentialsEnabled: true,
-          maxAgeInSeconds: 3600
         }
       },
-
-      backend: .backend
+      "backend": {
+        "type": "HTTP_BACKEND",
+        "url": "http://${COMPANIES_LB_IP}:8001/api/companies"
+      }
+    },
+    {
+      "path": "/api/companies/{companyId}",
+      "methods": [
+        "GET"
+      ],
+      "requestPolicies": {
+        "headerTransformations": {
+          "setHeaders": {
+            "items": [
+              {
+                "name": "X-User-Id",
+                "values": [
+                  "\${request.auth[sub]}"
+                ],
+                "ifExists": "OVERWRITE"
+              },
+              {
+                "name": "X-User-Email",
+                "values": [
+                  "\${request.auth[email]}"
+                ],
+                "ifExists": "OVERWRITE"
+              }
+            ]
+          }
+        }
+      },
+      "backend": {
+        "type": "HTTP_BACKEND",
+        "url": "http://${COMPANIES_LB_IP}:8001/api/companies/\${request.path[companyId]}"
+      }
+    },
+    {
+      "path": "/api/materials",
+      "methods": [
+        "GET",
+        "POST"
+      ],
+      "requestPolicies": {
+        "headerTransformations": {
+          "setHeaders": {
+            "items": [
+              {
+                "name": "X-User-Id",
+                "values": [
+                  "\${request.auth[sub]}"
+                ],
+                "ifExists": "OVERWRITE"
+              },
+              {
+                "name": "X-User-Email",
+                "values": [
+                  "\${request.auth[email]}"
+                ],
+                "ifExists": "OVERWRITE"
+              }
+            ]
+          }
+        }
+      },
+      "backend": {
+        "type": "HTTP_BACKEND",
+        "url": "http://${MATERIALS_LB_IP}:8002/api/materials"
+      }
+    },
+    {
+      "path": "/api/materials/{materialId}",
+      "methods": [
+        "GET"
+      ],
+      "requestPolicies": {
+        "headerTransformations": {
+          "setHeaders": {
+            "items": [
+              {
+                "name": "X-User-Id",
+                "values": [
+                  "\${request.auth[sub]}"
+                ],
+                "ifExists": "OVERWRITE"
+              },
+              {
+                "name": "X-User-Email",
+                "values": [
+                  "\${request.auth[email]}"
+                ],
+                "ifExists": "OVERWRITE"
+              }
+            ]
+          }
+        }
+      },
+      "backend": {
+        "type": "HTTP_BACKEND",
+        "url": "http://${MATERIALS_LB_IP}:8002/api/materials/\${request.path[materialId]}"
+      }
     }
   ]
 }
-' \
-> ecored-api-deployment.json
+EOF
+
+
 cat ecored-api-deployment.json
 ```
 <img width="470" height="460" alt="image" src="https://github.com/user-attachments/assets/6fe91f28-6c74-40b7-8650-d32a0fe24302" />
@@ -1769,6 +1859,16 @@ La especificación debe mostrar:
 - encabezado `X-User-Id` sobrescrito con `${request.auth[sub]}`;
 - rutas hacia las IP privadas de Companies y Materials.
 
+Solamente si tiene que actualizar el deployment por algún error debe actualizar asi:
+
+```bash
+oci api-gateway deployment update \
+  --deployment-id "$DEPLOYMENT_OCID" \
+  --specification file://ecored-api-deployment.json \
+  --force \
+  --wait-for-state SUCCEEDED \
+  --debug
+```
 ### Crear o actualizar el deployment
 
 Busque el deployment:
