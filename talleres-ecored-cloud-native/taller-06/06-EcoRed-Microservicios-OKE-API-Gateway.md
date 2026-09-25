@@ -1456,42 +1456,48 @@ fi
 Un gateway reutilizado podría haber sido creado sin el NSG nuevo. Obtenga la asociación existente:
 
 ```bash
+source oci.oke.env
+source network-resolved.oke.env
+API_GATEWAY_NSG_OCID=$(oci network nsg list \
+  --compartment-id "$COMPARTMENT_OCID" \
+  --vcn-id "$VCN_OCID" \
+  --display-name "$API_GATEWAY_NSG_NAME" \
+  --all \
+  --query 'data[0].id' \
+  --raw-output)
+GATEWAY_OCID=$(oci api-gateway gateway list \
+  --compartment-id "$COMPARTMENT_OCID" \
+  --display-name "$API_GATEWAY_NAME" \
+  --all \
+  --query 'data.items[0].id' \
+  --raw-output)
+```
+Compruebe ambos valores:
+
+```bash
+printf 'Gateway: <%s>\nNSG: <%s>\n' \
+  "$GATEWAY_OCID" \
+  "$API_GATEWAY_NSG_OCID"
+```
+
+<img width="820" height="395" alt="image" src="https://github.com/user-attachments/assets/f5b9d3b2-335e-41d5-97d3-048913b31068" />
+
+
+Ambos deben mostrar un OCID. Después consulte la asociación:
+
+```bash
 CURRENT_GATEWAY_NSG_IDS=$(oci api-gateway gateway get \
   --gateway-id "$GATEWAY_OCID" \
   --query 'data."network-security-group-ids"' \
   --output json | jq -c '. // []')
 
-printf 'NSG asociados actualmente: %s\n' \
+printf 'NSG asociado actualmente: %s\n' \
   "$CURRENT_GATEWAY_NSG_IDS"
+
+printf 'NSG esperado: %s\n' \
+  "$API_GATEWAY_NSG_OCID"
 ```
-
-Compruebe si contiene `API_GATEWAY_NSG_OCID`. Si falta, agréguelo sin retirar los NSG que ya tuviera el gateway:
-
-```bash
-if printf '%s' "$CURRENT_GATEWAY_NSG_IDS" | \
-  jq -e --arg id "$API_GATEWAY_NSG_OCID" \
-    'index($id) != null' \
-  > /dev/null; then
-
-  echo 'El NSG ya está asociado correctamente con API Gateway.'
-else
-  MERGED_GATEWAY_NSG_IDS=$(jq -cn \
-    --argjson current "$CURRENT_GATEWAY_NSG_IDS" \
-    --arg id "$API_GATEWAY_NSG_OCID" \
-    '$current + [$id] | unique')
-
-  oci api-gateway gateway update \
-    --gateway-id "$GATEWAY_OCID" \
-    --network-security-group-ids "$MERGED_GATEWAY_NSG_IDS" \
-    --force \
-    --wait-for-state SUCCEEDED \
-    > /dev/null
-
-  echo 'El NSG fue agregado a API Gateway.'
-fi
-```
-
-Esta versión conserva cualquier otro NSG previamente asociado. La opción `--network-security-group-ids` reemplaza el arreglo completo; por eso primero se recupera y combina su contenido.
+<img width="1085" height="262" alt="image" src="https://github.com/user-attachments/assets/41f95181-2b1a-4a92-9fdd-6742be23b82f" />
 
 ### Verificar el estado final de API Gateway
 
@@ -1533,6 +1539,9 @@ printf 'Estado esperado: ACTIVE\nEstado obtenido: %s\nTipo obtenido: %s\nNSG esp
   "$GATEWAY_ENDPOINT_TYPE" \
   "$API_GATEWAY_NSG_OCID"
 ```
+<img width="731" height="581" alt="image" src="https://github.com/user-attachments/assets/1d8d4865-6e78-44d5-8eba-d113c895311f" />
+
+
 
 No continúe hasta que:
 
@@ -1556,6 +1565,9 @@ else
   false
 fi
 ```
+<img width="666" height="238" alt="image" src="https://github.com/user-attachments/assets/85efbb0a-2670-4ee0-a1c9-bd2d47e59297" />
+
+
 
 Guarde los valores:
 
@@ -1571,6 +1583,14 @@ printf '%s\n' \
 
 chmod 600 runtime-resolved.oke.env
 ```
+verifique el archivo runtime-resolved.oke.env
+
+```bash
+cat runtime-resolved.oke.env 
+```
+
+<img width="607" height="147" alt="image" src="https://github.com/user-attachments/assets/a22a5600-24b9-42d0-8283-29fdeff1ea38" />
+
 
 La validación de F4-4.2 queda completa solamente cuando se cumplen estos tres puntos:
 
