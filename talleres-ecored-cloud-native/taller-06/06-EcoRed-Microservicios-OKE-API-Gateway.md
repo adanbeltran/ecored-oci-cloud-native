@@ -1893,6 +1893,7 @@ oci api-gateway deployment get \
 printf 'Estado esperado: ACTIVE\nEstado obtenido: %s\n' \
   "$DEPLOYMENT_STATE"
 ```
+<img width="1225" height="143" alt="image" src="https://github.com/user-attachments/assets/bd5e72ff-1d76-4861-b5e6-02e9b1584254" />
 
 No continúe si el estado no es `ACTIVE`.
 
@@ -1903,6 +1904,7 @@ API_BASE_URL="https://${GATEWAY_HOSTNAME}${API_PATH_PREFIX}/api"
 
 printf 'URL base de la API: %s\n' "$API_BASE_URL"
 ```
+<img width="1018" height="36" alt="image" src="https://github.com/user-attachments/assets/14637d68-eb75-41e9-ac83-507bae9b2f09" />
 
 El formato esperado es:
 
@@ -1927,13 +1929,14 @@ printf '%s\n' \
 chmod 600 runtime-resolved.oke.env
 cat runtime-resolved.oke.env
 ```
+<img width="748" height="207" alt="image" src="https://github.com/user-attachments/assets/8eea6e81-84f0-4974-998d-127b3fc9cf0f" />
 
 ### Probar la autenticación y CORS
 
 Pruebe una ruta sin token:
 
 ```bash
-curl -i "${API_BASE_URL}/companies"
+curl -i "${API_BASE_URL}/companies"; echo 
 ```
 
 El resultado esperado es:
@@ -1941,6 +1944,8 @@ El resultado esperado es:
 ```text
 HTTP/1.1 401 Unauthorized
 ```
+<img width="692" height="293" alt="image" src="https://github.com/user-attachments/assets/8c1c2c39-6997-4f20-8bd5-0f6e15efbc2f" />
+
 
 Este `401` es correcto: demuestra que el deployment existe, la ruta coincide y API Gateway exige autenticación antes de enviar la solicitud a Companies.
 
@@ -1953,6 +1958,7 @@ curl -i -X OPTIONS \
   -H 'Access-Control-Request-Headers: Authorization,Content-Type' \
   "${API_BASE_URL}/companies"
 ```
+<img width="588" height="396" alt="image" src="https://github.com/user-attachments/assets/e20a26eb-1fea-4e0f-aea6-a87eab2e1089" />
 
 La respuesta debe ser exitosa y contener un encabezado equivalente a:
 
@@ -2000,6 +2006,7 @@ sed -i \
 
 grep '^VITE_API_URL=' frontend-config.oke.env
 ```
+<img width="952" height="183" alt="image" src="https://github.com/user-attachments/assets/2c175e0a-4916-4fc3-a677-f62efb0670f6" />
 
 La salida debe coincidir con:
 
@@ -2023,6 +2030,7 @@ kubectl rollout status deployment/ecored-frontend \
   -n ecored \
   --timeout=5m
 ```
+<img width="833" height="457" alt="image" src="https://github.com/user-attachments/assets/5d1f3254-6ae3-4c40-8912-ced9f318cd37" />
 
 Compruebe los Pods:
 
@@ -2032,6 +2040,8 @@ kubectl get deployment,pods \
   -l app=ecored-frontend \
   -o wide
 ```
+<img width="1457" height="225" alt="image" src="https://github.com/user-attachments/assets/970cd487-5491-463e-b44a-73b1ea5b7991" />
+
 
 El Deployment debe mostrar `2/2` réplicas disponibles.
 
@@ -2043,6 +2053,7 @@ El entrypoint de Nginx genera nuevamente `runtime-config.js` cuando inicia cada 
 curl -fsS \
   "http://${FRONTEND_LB_IP}/runtime-config.js"
 ```
+<img width="1046" height="192" alt="image" src="https://github.com/user-attachments/assets/b15f3b69-16a3-470f-b443-625b6c1647d0" />
 
 Verifique específicamente la URL:
 
@@ -2051,6 +2062,7 @@ curl -fsS \
   "http://${FRONTEND_LB_IP}/runtime-config.js" | \
   grep -F "$API_BASE_URL"
 ```
+<img width="1052" height="125" alt="image" src="https://github.com/user-attachments/assets/f0377ffa-ae31-49b1-b67b-26a7683c5aa0" />
 
 El comando debe mostrar una línea que contenga la URL HTTPS de API Gateway.
 
