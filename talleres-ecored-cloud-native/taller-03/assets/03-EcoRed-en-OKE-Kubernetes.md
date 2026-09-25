@@ -2,7 +2,20 @@
 
 [← Taller 2](02-OCIR-y-Networking-Privado.md) | [Índice de la ruta](README.md) | [Taller 4 →](04-Resiliencia-Escalabilidad-y-Entrada-OKE.md)
 
+## Siglas utilizadas en este taller
 
+La primera aparición de cada sigla se define aquí; a partir de este punto se utiliza directamente.
+
+- **OCI — Oracle Cloud Infrastructure:** Infraestructura de Nube de Oracle.
+- **OKE — Oracle Kubernetes Engine:** Motor Kubernetes de Oracle.
+- **OCIR — Oracle Cloud Infrastructure Registry / OCI Container Registry:** Registro de Contenedores de Oracle Cloud Infrastructure.
+- **VCN — Virtual Cloud Network:** Red Virtual en la Nube.
+- **NAT — Network Address Translation:** Traducción de Direcciones de Red.
+- **NSG — Network Security Group:** Grupo de Seguridad de Red.
+- **API — Application Programming Interface:** Interfaz de Programación de Aplicaciones.
+- **CIDR — Classless Inter-Domain Routing:** Enrutamiento entre Dominios sin Clases.
+- **IAM — Identity and Access Management:** Gestión de Identidad y Acceso.
+- **YAML — YAML Ain’t Markup Language:** YAML no es un Lenguaje de Marcado.
 
 ## Relación con la arquitectura destino
 
@@ -464,273 +477,157 @@ Compruebe en OCI Console que el tag `v1.0` existe en **Developer Services → Co
 
 ![Imagen ecored-circular v1.0 disponible en OCIR con los identificadores protegidos](assets/taller-3/24-ocir-imagen-v1-redactada.png)
 
-## Paso 2.2. Crear credenciales de pull
+## Paso 2.2. Crear credenciales de pull si son necesarias
 
 Como el repository de este taller es privado, Kubernetes necesita credenciales válidas para descargar la imagen. El nombre de usuario de OCIR tiene esta forma:
 
-Utilizaremos podman(una herramienta de código abierto desarrollada por Red Hat para la gestión de contenedores, pods e imágenes de contenedores)
-
-```bash
-podman login --authfile "$HOME/ocir-auth.json" gru.ocir.io
+```text
+<TENANCY_NAMESPACE>/<USUARIO_OCI>
 ```
 
-Ahora actualice `ocir-secret` usando directamente el archivo de autenticación válido. Ejecute esta línea completa:
+Utilice el mismo usuario que funcionó en `docker login`. La contraseña debe ser un **Auth Token de OCI vigente**; no utilice la contraseña de la cuenta, una API key ni un token que haya sido eliminado.
+
+Registre ambas variables en Cloud Shell. La opción `-s` impide que el token se muestre en la terminal:
 
 ```bash
-kubectl create secret generic ocir-secret --from-file=.dockerconfigjson="$HOME/ocir-auth.json" --type=kubernetes.io/dockerconfigjson --namespace=ecored --dry-run=client -o yaml | kubectl apply -f -
+read -r -p "Usuario utilizado en docker login: " OCIR_USERNAME
+read -r -s -p "Auth Token vigente de OCIR: " OCIR_AUTH_TOKEN; echo
 ```
 
-Valide el tipo del secreto:
+<img width="917" height="125" alt="image" src="https://github.com/user-attachments/assets/556c7e64-c64d-468b-9c17-d23f1316377c" />
+
+
+Antes de crear el Secret, valide las credenciales contra el manifiesto de la imagen privada:
 
 ```bash
-kubectl get secret ocir-secret -n ecored -o jsonpath='{.type}{"\n"}'
+curl -sS -o /dev/null \
+  -w 'Respuesta de OCIR: HTTP %{http_code}\n' \
+  -u "$OCIR_USERNAME:$OCIR_AUTH_TOKEN" \
+  -H 'Accept: application/vnd.oci.image.manifest.v1+json' \
+  "https://gru.ocir.io/v2/<TENANCY_NAMESPACE>/ecored/ecored-circular/manifests/v1.0"
 ```
 
-Debe responder:
+El resultado requerido es:
 
 ```text
-kubernetes.io/dockerconfigjson
+Respuesta de OCIR: HTTP 200
 ```
 
-Verifique que el Deployment utilice ese secreto:
+Si obtiene `HTTP 401`, no continúe: el usuario o el Auth Token no son válidos. Genere un nuevo **Auth Token** en **Profile → Tokens and keys → Auth tokens**, cópielo completo y repita la validación.
+
+Después de obtener `HTTP 200`, cree o actualice el `imagePullSecret`:
 
 ```bash
-kubectl get deployment ecored -n ecored -o jsonpath='{.spec.template.spec.imagePullSecrets[*].name}{"\n"}'
+kubectl create secret docker-registry ocir-secret \
+  --docker-server=gru.ocir.io \
+  --docker-username="$OCIR_USERNAME" \
+  --docker-password="$OCIR_AUTH_TOKEN" \
+  --namespace=ecored \
+  --dry-run=client -o yaml | kubectl apply -f -
+
+unset OCIR_USERNAME OCIR_AUTH_TOKEN
 ```
 
-Debe responder:
+El uso de `--dry-run=client -o yaml | kubectl apply -f -` permite ejecutar el mismo procedimiento tanto para crear el Secret por primera vez como para actualizarlo si el Auth Token cambia.
 
-```text
-ocir-secret
-```
+> **Advertencia:** el Auth Token debe permanecer vigente mientras el cluster necesite descargar imágenes privadas. Si se elimina o revoca, actualice `ocir-secret` con un nuevo token y reinicie el Deployment. No escriba el token directamente en archivos YAML, no lo incluya en pantallazos y no lo versione.
 
-Después reinicie el Deployment:
+### Verificación
 
 ```bash
-kubectl rollout restart deployment/ecored -n ecored
+kubectl get secret ocir-secret -n ecored
 ```
 
-Finalmente observe los Pods:
+El Secret debe existir con tipo `kubernetes.io/dockerconfigjson`.
+
+## Paso 2.3. Crear ConfigMap para valores no sensibles
+
+En Cloud Shell cree el directorio de manifiestos:
 
 ```bash
-kubectl get pods -n ecored -w
+mkdir -p "$HOME/k8s"
 ```
 
-El resultado esperado es:
-
-```text
-READY   STATUS
-1/1     Running
-```
-
-![alt text](image.png)
-
-
-El Pod ya alcanzó `1/1 Running`, sin reinicios. Esto confirma que OKE pudo autenticarse en OCIR, descargar la imagen privada e iniciar el contenedor.
-
-El siguiente paso es revisar el Deployment y los logs:
+Cree `$HOME/k8s/ecored-configmap.yaml`:
 
 ```bash
-kubectl get deployments -n ecored
-```
-```bash
-kubectl get pods -n ecored -o wide
-```
-```bash
-kubectl logs -n ecored deployment/ecored --tail=100
-```
-
-![alt text](image-1.png)
-
-El Deployment y el Pod deben estar ok:
-
-* Deployment: `1/1`
-* Pod: `1/1 Running`
-* Reinicios: `0`
-* Gunicorn inició sin errores.
-
-El puerto `127.0.0.1:8000` corresponde a Gunicorn dentro del contenedor. La imagen EcoRed utiliza Nginx como entrada en el puerto `10000`, por lo que mantendremos ese puerto como destino del Service.
-
-Ejecuta:
-
-```bash
-cat > "$HOME/k8s/ecored-service.yaml" <<'EOF'
+cat > "$HOME/k8s/ecored-configmap.yaml" <<'EOF'
 apiVersion: v1
-kind: Service
+kind: ConfigMap
 metadata:
-  name: ecored-service
+  name: ecored-config
   namespace: ecored
-spec:
-  type: ClusterIP
-  selector:
-    app: ecored
-  ports:
-    - name: http
-      protocol: TCP
-      port: 80
-      targetPort: 10000
+data:
+  PORT: "10000"
+  DJANGO_DEBUG: "False"
 EOF
 ```
 
-Valida el manifiesto:
+Aplique y verifique:
 
 ```bash
-kubectl apply --dry-run=client \
-  -f "$HOME/k8s/ecored-service.yaml"
+kubectl apply -f "$HOME/k8s/ecored-configmap.yaml"
+kubectl get configmap ecored-config -n ecored
 ```
 
-Si no presenta errores, aplícalo:
+## Paso 2.4. Crear los Secrets de la aplicación
 
-```bash
-kubectl apply \
-  -f "$HOME/k8s/ecored-service.yaml"
-```
+EcoRed utiliza dos fuentes sensibles diferentes:
 
-Verifica el Service y su asociación con el Pod:
+- las variables del backend almacenadas en el archivo local `.env`;
+- el archivo JSON de la cuenta de servicio de Firebase.
 
-```bash
-kubectl get service ecored-service -n ecored
-```
-
-```bash
-kubectl get endpointslice \
-  -n ecored \
-  -l kubernetes.io/service-name=ecored-service
-```
-
-El resultado esperado del Service debe indicar:
+No copie sus valores en el taller ni los escriba en un manifiesto versionado. En el menú de OCI Cloud Shell seleccione **Upload** y cargue temporalmente los dos archivos en el directorio personal de la sesión:
 
 ```text
-NAME             TYPE        CLUSTER-IP      PORT(S)
-ecored-service   ClusterIP   <IP_INTERNA>    80/TCP
+.env
+firebase-service-account.json
 ```
 
-![alt text](image-2.png)
-
-El Service quedó configurado correctamente:
-
-* Tipo: `ClusterIP`
-* IP interna: `10.96.165.29`
-* Puerto del Service: `80/TCP`
-* Endpoint asociado: `10.244.0.9:10000`
-
-Esto confirma que el selector `app: ecored` encontró el Pod y que el Service dirige el tráfico hacia su puerto `10000`. 
-
-Continúa con la prueba mediante `port-forward`:
+Compruebe que ambos archivos existen sin imprimir sus contenidos:
 
 ```bash
-kubectl port-forward \
-  -n ecored \
-  service/ecored-service \
-  8080:80 \
-  >"$HOME/ecored-port-forward.log" 2>&1 &
-
-PORT_FORWARD_PID=$!
-sleep 3
+test -f "$HOME/.env" && echo "Archivo .env cargado correctamente"
+test -f "$HOME/firebase-service-account.json" && echo "Archivo Firebase cargado correctamente"
 ```
 
-Comprueba que el proceso sigue activo:
+Para verificar únicamente los nombres de las variables del `.env`, sin revelar valores, ejecute:
 
 ```bash
-ps -p "$PORT_FORWARD_PID"
+awk -F= '/^[A-Za-z_][A-Za-z0-9_]*=/{print $1}' "$HOME/.env"
 ```
 
-Prueba el endpoint de salud:
+Cree o actualice el Secret de variables del backend:
 
 ```bash
-curl -i --max-time 15 \
-  http://127.0.0.1:8080/api/health/
+kubectl create secret generic ecored-secrets \
+  --from-env-file="$HOME/.env" \
+  --namespace=ecored \
+  --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-El resultado esperado debe incluir un código HTTP exitoso, por ejemplo:
-
-```text
-HTTP/1.1 200 OK
-```
-
-![alt text](image-3.png)
-
-
-![alt text](image-4.png)
-
-
-Cuando termine la prueba, cierra la redirección:
+Cree o actualice un Secret independiente para conservar el nombre de archivo esperado por la aplicación:
 
 ```bash
-kill "$PORT_FORWARD_PID"
-wait "$PORT_FORWARD_PID" 2>/dev/null || true
+kubectl create secret generic firebase-credentials \
+  --from-file=firebase-service-account.json="$HOME/firebase-service-account.json" \
+  --namespace=ecored \
+  --dry-run=client -o yaml | kubectl apply -f -
 ```
 
-Si `curl` no responde correctamente, consulta el diagnóstico sin reiniciar nada:
+Elimine de Cloud Shell los archivos temporales después de crear los Secrets:
 
 ```bash
-cat "$HOME/ecored-port-forward.log"
+rm -f "$HOME/.env" "$HOME/firebase-service-account.json"
 ```
 
-Todo está correcto:
-
-* Service `ecored-service`: creado como `ClusterIP`.
-* Endpoint asociado: `10.244.0.9:10000`.
-* `port-forward`: activo durante la prueba.
-* Endpoint `/api/health/`: respondió `HTTP/1.1 200 OK`.
-* Respuesta de la aplicación: `{"status":"ok"}`.
-* El proceso de `port-forward` se cerró correctamente.
-* El log confirma que la conexión fue atendida por el puerto `10000`.
-
-
-El siguiente paso es comprobar la reconciliación automática de Kubernetes:
+### Verificación
 
 ```bash
-OLD_POD=$(kubectl get pods \
-  -n ecored \
-  -l app=ecored \
-  -o jsonpath='{.items[0].metadata.name}')
-
-echo "Pod que se eliminará: $OLD_POD"
-```
-![alt text](image-5.png)
-
-Elimina únicamente ese Pod:
-
-```bash
-kubectl delete pod "$OLD_POD" -n ecored
+kubectl get secrets ecored-secrets firebase-credentials -n ecored
 ```
 
-Observa cómo el Deployment crea un reemplazo:
-
-```bash
-kubectl get pods -n ecored -w
-```
-
-Espera hasta que aparezca un Pod nuevo con:
-
-```text
-READY   STATUS
-1/1     Running
-```
-
-Después presiona `Ctrl+C` y verifica:
-
-```bash
-NEW_POD=$(kubectl get pods \
-  -n ecored \
-  -l app=ecored \
-  -o jsonpath='{.items[0].metadata.name}')
-
-echo "Pod anterior: $OLD_POD"
-echo "Pod nuevo:    $NEW_POD"
-
-kubectl get deployment ecored -n ecored
-kubectl get pods -n ecored -o wide
-```
-
-El nombre del Pod nuevo debe ser diferente. Esto demuestra que el Deployment detectó la pérdida de una réplica y restauró automáticamente el estado deseado.
-
-![alt text](image-6.png)
-
-
-![alt text](image-7.png)
-
+Los dos recursos deben aparecer con tipo `Opaque`. No utilice `kubectl get secret ... -o yaml`, porque esa salida expone datos codificados que no deben formar parte de las evidencias.
 
 # Fase 3. Desplegar EcoRed declarativamente
 
@@ -881,6 +778,22 @@ sleep 3
 curl -fsS http://127.0.0.1:8080/api/health/
 kill "$PORT_FORWARD_PID"
 ```
+
+### Verificación
+
+El endpoint `/api/health/` responde correctamente desde OKE sin exposición pública permanente. El `127.0.0.1` de Cloud Shell pertenece a esa sesión remota y no al navegador del estudiante; por eso la comprobación se realiza con `curl` en la misma terminal. La publicación mediante Load Balancer se realizará en el Taller 4.
+
+## Paso 4.2. Eliminar el Pod y observar reconciliación
+
+```bash
+kubectl get pods -n ecored
+kubectl delete pod -n ecored <POD>
+kubectl get pods -n ecored -w
+```
+
+### Verificación
+
+El Deployment crea un nuevo pod automáticamente.
 
 ## Paso 4.3. Versionar únicamente manifiestos sin secretos
 
