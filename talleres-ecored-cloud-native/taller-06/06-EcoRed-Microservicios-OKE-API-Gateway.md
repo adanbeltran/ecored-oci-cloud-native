@@ -101,6 +101,9 @@ flowchart TB
     MLB -.-> OBS
 ```
 
+<img width="1536" height="1024" alt="ChatGPT Image 25 sept 2026, 06_40_01 a m" src="https://github.com/user-attachments/assets/96b5a2fd-2db9-4c12-bd8b-ac7b95d7b763" />
+
+
 | Componente | Responsabilidad |
 |---|---|
 | Navegador | Ejecuta React, autentica con Firebase y consume la URL pública del gateway. |
