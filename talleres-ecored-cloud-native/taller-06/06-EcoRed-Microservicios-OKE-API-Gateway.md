@@ -2180,6 +2180,12 @@ http://<FRONTEND_LB_IP>
 
 <img width="1740" height="858" alt="image" src="https://github.com/user-attachments/assets/b8bb7882-3d3d-40b6-af0a-02d9846055c2" />
 
+<img width="1050" height="545" alt="image" src="https://github.com/user-attachments/assets/2a7ef7aa-5606-4867-8a99-9db6890ed62b" />
+
+
+<img width="1560" height="803" alt="image" src="https://github.com/user-attachments/assets/d6cb8192-39dd-4fd4-a28d-8ee96932c7ff" />
+
+
 
 Compruebe en el navegador:
 
