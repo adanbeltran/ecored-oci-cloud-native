@@ -1609,21 +1609,14 @@ source oci.oke.env
 source network-resolved.oke.env
 source runtime-resolved.oke.env
 source frontend-config.oke.env
-
 printf 'Proyecto Firebase: %s\nGateway: %s\nPrefijo: %s\n' \
   "$VITE_FIREBASE_PROJECT_ID" \
   "$GATEWAY_HOSTNAME" \
   "$API_PATH_PREFIX"
 ```
+<img width="407" height="270" alt="image" src="https://github.com/user-attachments/assets/6a8572e4-2f66-421c-9b81-aca9b2bd671f" />
 
 `VITE_FIREBASE_PROJECT_ID` debe contener el ID real del proyecto, no `REEMPLACE_PROJECT_ID`.
-
-Normalice el prefijo para evitar una `/` duplicada al construir la URL:
-
-```bash
-API_PATH_PREFIX="${API_PATH_PREFIX%/}"
-printf 'Prefijo normalizado: %s\n' "$API_PATH_PREFIX"
-```
 
 ### Renderizar la especificación
 
@@ -1631,14 +1624,26 @@ Renderice la plantilla incluida:
 
 ```bash
 sed \
-  -e "s|__FIREBASE_PROJECT_ID__|${VITE_FIREBASE_PROJECT_ID}|g" \
-  -e "s|__FRONTEND_LB_IP__|${FRONTEND_LB_IP}|g" \
   -e "s|__COMPANIES_LB_IP__|${COMPANIES_LB_IP}|g" \
   -e "s|__MATERIALS_LB_IP__|${MATERIALS_LB_IP}|g" \
-  ecored-api-deployment.template.json | \
-  jq '.requestPolicies.cors.isAllowCredentialsEnabled = true' \
-  > ecored-api-deployment.json
+  -e "s|__FRONTEND_LB_IP__|${FRONTEND_LB_IP}|g" \
+  ecored-api-deployment.template.json \
+| jq '{
+    routes: [
+      .routes[] |
+      {
+        path: .path,
+        methods: .methods,
+        backend: .backend
+      }
+    ]
+  }' \
+> ecored-api-deployment.json
+
+cat ecored-api-deployment.json
 ```
+<img width="645" height="545" alt="image" src="https://github.com/user-attachments/assets/edaee13b-b601-461d-a94f-0557e70c03b1" />
+
 
 La política CORS usa un origen específico y habilita credenciales porque el navegador envía el token en el encabezado `Authorization`.
 
@@ -1666,11 +1671,14 @@ jq '{
     .routes[] | {
       path: .path,
       methods: .methods,
-      backend: .backend.url
+      backend: .backend.urlD
     }
   ]
 }' ecored-api-deployment.json
 ```
+
+<img width="232" height="547" alt="image" src="https://github.com/user-attachments/assets/7c652090-b778-4b7e-9884-2a1fd3c480f4" />
+
 
 La especificación debe mostrar:
 
@@ -1695,6 +1703,7 @@ DEPLOYMENT_OCID=$(oci api-gateway deployment list \
   --query 'data.items[0].id' \
   --raw-output)
 ```
+<img width="221" height="132" alt="image" src="https://github.com/user-attachments/assets/1a7e5f59-e965-46f6-bcb7-7a910425401c" />
 
 Créelo si no existe. Si ya existe, reemplace su especificación:
 
@@ -1744,6 +1753,8 @@ else
   fi
 fi
 ```
+<img width="641" height="282" alt="image" src="https://github.com/user-attachments/assets/2a39bf9a-eb4b-49f0-9e9c-d9d0a26006ee" />
+
 
 > `deployment create` y `deployment update` esperan el estado `SUCCEEDED` de la solicitud de trabajo. `deployment get` se utiliza después para comprobar que el recurso quedó `ACTIVE`.
 
