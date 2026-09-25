@@ -1081,7 +1081,7 @@ Si posteriormente publica el frontend con HTTPS o con un dominio propio, reempla
 ```bash
 kubectl create configmap companies-config \
   --namespace ecored \
-  --from-env-file=companies-config.oke.env \
+  --from-env-file=companies-config.oke.env \****
   --dry-run=client \
   -o yaml | kubectl apply -f -
 
@@ -1627,23 +1627,99 @@ sed \
   -e "s|__COMPANIES_LB_IP__|${COMPANIES_LB_IP}|g" \
   -e "s|__MATERIALS_LB_IP__|${MATERIALS_LB_IP}|g" \
   -e "s|__FRONTEND_LB_IP__|${FRONTEND_LB_IP}|g" \
+  -e "s|__FIREBASE_PROJECT_ID__|${VITE_FIREBASE_PROJECT_ID}|g" \
   ecored-api-deployment.template.json \
-| jq '{
-    routes: [
-      .routes[] |
-      {
-        path: .path,
-        methods: .methods,
-        backend: .backend
-      }
-    ]
-  }' \
-> ecored-api-deployment.json
+| jq \
+  --arg FIREBASE_PROJECT_ID "$VITE_FIREBASE_PROJECT_ID" \
+  --arg FRONTEND_LB_IP "$FRONTEND_LB_IP" '
+{
+  routes: [
+    .routes[] |
+    {
+      path: .path,
+      methods: .methods,
 
+      requestPolicies: {
+
+        authentication: {
+          type: "TOKEN_AUTHENTICATION",
+          tokenHeader: "Authorization",
+          tokenAuthScheme: "Bearer",
+          isAnonymousAccessAllowed: false,
+          maxClockSkewInSeconds: 30,
+
+          validationPolicy: {
+            type: "REMOTE_JWKS",
+            uri: "https://www.googleapis.com/service_accounts/v1/jwk/securetoken@system.gserviceaccount.com",
+            isSslVerifyDisabled: false,
+            maxCacheDurationInHours: 1,
+
+            additionalValidationPolicy: {
+              issuers: [
+                ("https://securetoken.google.com/" + $FIREBASE_PROJECT_ID)
+              ],
+              audiences: [
+                $FIREBASE_PROJECT_ID
+              ],
+              verifyClaims: [
+                {
+                  key: "sub",
+                  isRequired: true
+                }
+              ]
+            }
+          }
+        },
+
+        headerTransformations: {
+          setHeaders: {
+            items: [
+              {
+                name: "X-User-Id",
+                values: [
+                  "${request.auth[sub]}"
+                ],
+                ifExists: "OVERWRITE"
+              },
+              {
+                name: "X-User-Email",
+                values: [
+                  "${request.auth[email]}"
+                ],
+                ifExists: "OVERWRITE"
+              }
+            ]
+          }
+        },
+
+        cors: {
+          allowedOrigins: [
+            ("http://" + $FRONTEND_LB_IP)
+          ],
+          allowedMethods: [
+            "GET",
+            "POST",
+            "OPTIONS"
+          ],
+          allowedHeaders: [
+            "Authorization",
+            "Content-Type"
+          ],
+          exposedHeaders: [],
+          isAllowCredentialsEnabled: true,
+          maxAgeInSeconds: 3600
+        }
+      },
+
+      backend: .backend
+    }
+  ]
+}
+' \
+> ecored-api-deployment.json
 cat ecored-api-deployment.json
 ```
-<img width="387" height="590" alt="image" src="https://github.com/user-attachments/assets/c29d9570-abdc-4c36-9ec3-1fc5af9a81de" />
-
+<img width="470" height="460" alt="image" src="https://github.com/user-attachments/assets/6fe91f28-6c74-40b7-8650-d32a0fe24302" />
 
 
 La política CORS usa un origen específico y habilita credenciales porque el navegador envía el token en el encabezado `Authorization`.
@@ -1663,19 +1739,21 @@ fi
 Revise un resumen sin imprimir tokens ni credenciales:
 
 ```bash
-jq '{
-  autenticacion: .requestPolicies.authentication.type,
-  emisores: .requestPolicies.authentication.validationPolicy.additionalValidationPolicy.issuers,
-  audiencias: .requestPolicies.authentication.validationPolicy.additionalValidationPolicy.audiences,
-  cors: .requestPolicies.cors,
+jq '
+{
   rutas: [
-    .routes[] | {
+    .routes[] |
+    {
       path: .path,
       methods: .methods,
-      backend: .backend.urlD
+      autenticacion: .requestPolicies.authentication.type,
+      issuer: .requestPolicies.authentication.validationPolicy.additionalValidationPolicy.issuers,
+      audiences: .requestPolicies.authentication.validationPolicy.additionalValidationPolicy.audiences,
+      backend: .backend.url
     }
   ]
-}' ecored-api-deployment.json
+}
+' ecored-api-deployment.json
 ```
 
 <img width="232" height="547" alt="image" src="https://github.com/user-attachments/assets/7c652090-b778-4b7e-9884-2a1fd3c480f4" />
@@ -1696,21 +1774,36 @@ La especificación debe mostrar:
 Busque el deployment:
 
 ```bash
-DEPLOYMENT_OCID=$(oci api-gateway deployment list \
-  --compartment-id "$COMPARTMENT_OCID" \
-  --gateway-id "$GATEWAY_OCID" \
-  --display-name "$API_DEPLOYMENT_NAME" \
-  --all \
-  --query 'data.items[0].id' \
-  --raw-output)
+oci api-gateway deployment list \
+--compartment-id "$COMPARTMENT_OCID" \
+--gateway-id "$GATEWAY_OCID" \
+--all \
+--output table
 ```
 <img width="221" height="132" alt="image" src="https://github.com/user-attachments/assets/1a7e5f59-e965-46f6-bcb7-7a910425401c" />
 
 Créelo si no existe. Si ya existe, reemplace su especificación:
 
 ```bash
+# Recuperar deployment existente si la variable no está definida
 if [ -z "$DEPLOYMENT_OCID" ] || \
    [ "$DEPLOYMENT_OCID" = "null" ]; then
+
+  DEPLOYMENT_OCID=$(oci api-gateway deployment list \
+    --compartment-id "$COMPARTMENT_OCID" \
+    --gateway-id "$GATEWAY_OCID" \
+    --all \
+    --query 'data.items[0].id' \
+    --raw-output)
+
+fi
+
+
+# Si no existe deployment, crearlo
+if [ -z "$DEPLOYMENT_OCID" ] || \
+   [ "$DEPLOYMENT_OCID" = "null" ]; then
+
+  echo "Creando nuevo deployment..."
 
   oci api-gateway deployment create \
     --compartment-id "$COMPARTMENT_OCID" \
@@ -1721,28 +1814,43 @@ if [ -z "$DEPLOYMENT_OCID" ] || \
     --wait-for-state SUCCEEDED \
     > /dev/null
 
+
   DEPLOYMENT_OCID=$(oci api-gateway deployment list \
     --compartment-id "$COMPARTMENT_OCID" \
     --gateway-id "$GATEWAY_OCID" \
-    --display-name "$API_DEPLOYMENT_NAME" \
     --all \
     --query 'data.items[0].id' \
     --raw-output)
 
+
   printf 'Deployment creado: %s\n' "$DEPLOYMENT_OCID"
+
+
 else
+
+  echo "Deployment existente encontrado: $DEPLOYMENT_OCID"
+
   CURRENT_PATH_PREFIX=$(oci api-gateway deployment get \
     --deployment-id "$DEPLOYMENT_OCID" \
     --query 'data."path-prefix"' \
     --raw-output)
 
+
   if [ "$CURRENT_PATH_PREFIX" != "$API_PATH_PREFIX" ]; then
-    printf 'ERROR: el deployment existente usa el prefijo %s y se esperaba %s.\n' \
+
+    printf 'ERROR: el deployment existente usa el prefijo "%s" y se esperaba "%s".\n' \
       "$CURRENT_PATH_PREFIX" \
       "$API_PATH_PREFIX"
-    echo 'El prefijo no se puede cambiar con deployment update. Deténgase y revise el recurso.'
-    false
+
+    echo 'El prefijo no se puede cambiar con deployment update.'
+    echo 'Debe crear un nuevo deployment con otro nombre.'
+    exit 1
+
+
   else
+
+    echo "Actualizando deployment existente..."
+
     oci api-gateway deployment update \
       --deployment-id "$DEPLOYMENT_OCID" \
       --specification file://ecored-api-deployment.json \
@@ -1750,8 +1858,11 @@ else
       --wait-for-state SUCCEEDED \
       > /dev/null
 
+
     printf 'Deployment actualizado: %s\n' "$DEPLOYMENT_OCID"
+
   fi
+
 fi
 ```
 <img width="641" height="282" alt="image" src="https://github.com/user-attachments/assets/2a39bf9a-eb4b-49f0-9e9c-d9d0a26006ee" />
