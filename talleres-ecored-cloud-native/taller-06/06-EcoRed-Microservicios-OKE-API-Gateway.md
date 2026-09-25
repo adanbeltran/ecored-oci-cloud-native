@@ -2066,11 +2066,20 @@ curl -fsS \
 
 El comando debe mostrar una línea que contenga la URL HTTPS de API Gateway.
 
+```bash
+cat runtime-resolved.oke.env
+```
+<img width="1157" height="205" alt="image" src="https://github.com/user-attachments/assets/10a1f4a4-0129-4b8d-8772-b4a39f9706cc" />
+
 Abra finalmente:
 
 ```text
 http://<FRONTEND_LB_IP>
 ```
+<img width="1228" height="848" alt="image" src="https://github.com/user-attachments/assets/5dedf3f9-5919-4637-87ec-fc44ec69625f" />
+
+<img width="1740" height="858" alt="image" src="https://github.com/user-attachments/assets/b8bb7882-3d3d-40b6-af0a-02d9846055c2" />
+
 
 Compruebe en el navegador:
 
