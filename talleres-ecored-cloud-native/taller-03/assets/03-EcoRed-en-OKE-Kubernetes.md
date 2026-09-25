@@ -105,7 +105,7 @@ OKE Cluster
 5. Confirme que puede crear clusters dentro de `ecored-dev`.
 6. Conserve la VCN `ecored-vcn` y los recursos de networking privado ya preparados.
 
-![Listado de Kubernetes Clusters en el compartimento ecored-dev](assets/taller-3/01-listado-clusters-oke.png)
+![Listado de Kubernetes Clusters en el compartimento ecored-dev](capturas/01-listado-clusters-oke.png)
 
 ### Verificación
 
