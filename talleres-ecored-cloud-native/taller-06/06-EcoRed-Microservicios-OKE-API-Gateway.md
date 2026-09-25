@@ -1642,7 +1642,8 @@ sed \
 
 cat ecored-api-deployment.json
 ```
-<img width="645" height="545" alt="image" src="https://github.com/user-attachments/assets/edaee13b-b601-461d-a94f-0557e70c03b1" />
+<img width="387" height="590" alt="image" src="https://github.com/user-attachments/assets/c29d9570-abdc-4c36-9ec3-1fc5af9a81de" />
+
 
 
 La política CORS usa un origen específico y habilita credenciales porque el navegador envía el token en el encabezado `Authorization`.
