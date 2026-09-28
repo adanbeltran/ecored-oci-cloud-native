@@ -1,22 +1,22 @@
-<img width="395" height="72" alt="Pasted image 20260928093001" src="https://github.com/user-attachments/assets/2d9c4126-d9d9-413c-8e02-6df347e37d8c" />
-<img width="1113" height="793" alt="Pasted image 20260928092921" src="https://github.com/user-attachments/assets/0e8da0e4-3732-4898-a924-37eb2058ec81" />
-<img width="1147" height="758" alt="Pasted image 20260928092136" src="https://github.com/user-attachments/assets/8b606443-44e5-4fd4-9902-3a2013d8fc07" />
-<img width="1116" height="783" alt="Pasted image 20260928090911" src="https://github.com/user-attachments/assets/ab235b28-6400-4928-b78f-c9aa0401b550" />
-<img width="1112" height="783" alt="Pasted image 20260928090819" src="https://github.com/user-attachments/assets/daa3b27a-7709-46e4-b79e-988784e9d9fb" />
-<img width="1123" height="800" alt="Pasted image 20260928090639" src="https://github.com/user-attachments/assets/c6754bc0-2303-48d4-b4a9-2c1d4908e145" />
-<img width="1128" height="753" alt="Pasted image 20260928090153" src="https://github.com/user-attachments/assets/bd56076f-2170-43a8-8a48-2da35c316b03" />
-<img width="1536" height="1024" alt="Pasted image 20260928085357" src="https://github.com/user-attachments/assets/0c7d0506-8133-41ed-864c-1ea4b3b1ec11" />
-<img width="1137" height="780" alt="Pasted image 20260928085251" src="https://github.com/user-attachments/assets/7ba4c66b-90a9-41c1-a378-68fc2f808284" />
-<img width="1143" height="773" alt="Pasted image 20260928085038" src="https://github.com/user-attachments/assets/8b1c1de8-07d6-4943-bfdf-522f13658cfb" />
-<img width="1095" height="755" alt="Pasted image 20260928084946" src="https://github.com/user-attachments/assets/9c5ea678-2192-41b0-a071-4d460a237b79" />
-<img width="1137" height="826" alt="Pasted image 20260928084232" src="https://github.com/user-attachments/assets/57191bf1-18cf-4b1f-a521-5fde7ba6959e" />
-<img width="1122" height="807" alt="Pasted image 20260928084016" src="https://github.com/user-attachments/assets/1469dda4-a4ab-4a34-9c29-8eedf2092d85" />
-<img width="1101" height="762" alt="Pasted image 20260928083200" src="https://github.com/user-attachments/assets/ca201b3b-ef2e-4003-989c-72afb4e18aad" />
-<img width="1083" height="807" alt="Pasted image 20260928082838" src="https://github.com/user-attachments/assets/04703cfe-aad4-4abb-82a8-121a0b6faad8" />
-REGION - Availability Domain
+### Este material acompaña el Taller 6 y explica, con los nombres y valores observados durante su ejecución, cómo se relacionan Kubernetes, OCI Load Balancer, OCI API Gateway, los NSG y los microservicios.
 
 
-Este material acompaña el Taller 6 y explica, con los nombres y valores observados durante su ejecución, cómo se relacionan Kubernetes, OCI Load Balancer, OCI API Gateway, los NSG y los microservicios.
+
+<img width="1143" height="773" alt="Pasted image 20260928085038" src="https://github.com/user-attachments/assets/62301cc3-e8c8-49b7-b8cd-9c4ec78a2df1" /><img width="1095" height="755" alt="Pasted image 20260928084946" src="https://github.com/user-attachments/assets/b1071928-43a7-496d-b80c-582fc04a00f2" />
+<img width="1137" height="826" alt="Pasted image 20260928084232" src="https://github.com/user-attachments/assets/fbfacee7-798b-49e5-aa01-b94fdcb75643" />
+<img width="1122" height="807" alt="Pasted image 20260928084016" src="https://github.com/user-attachments/assets/e8d36fcf-2d62-4cd2-b084-816ed6869eb9" />
+<img width="1101" height="762" alt="Pasted image 20260928083200" src="https://github.com/user-attachments/assets/67731c28-76c6-414a-9c01-ec241b5538a4" />
+<img width="1083" height="807" alt="Pasted image 20260928082838" src="https://github.com/user-attachments/assets/526b1d3d-65e8-4695-b9f2-4de2103f3777" />
+<img width="395" height="72" alt="Pasted image 20260928093001" src="https://github.com/user-attachments/assets/153ca639-0e5b-4b6a-9c17-3322e35b6fc9" />
+<img width="1113" height="793" alt="Pasted image 20260928092921" src="https://github.com/user-attachments/assets/ee362e6e-e067-40c9-8d86-bab765a67dc9" />
+<img width="1147" height="758" alt="Pasted image 20260928092136" src="https://github.com/user-attachments/assets/f8f7f34f-b910-47ca-b343-b46853b09c58" />
+<img width="1116" height="783" alt="Pasted image 20260928090911" src="https://github.com/user-attachments/assets/79eb364a-b476-4306-bf49-8c4800f8cb04" />
+<img width="1112" height="783" alt="Pasted image 20260928090819" src="https://github.com/user-attachments/assets/3fadb769-62fa-49dd-acad-30ddf5565a9c" />
+<img width="1123" height="800" alt="Pasted image 20260928090639" src="https://github.com/user-attachments/assets/c90d1af5-1b61-40f6-9806-154dbc6331f0" />
+<img width="1128" height="753" alt="Pasted image 20260928090153" src="https://github.com/user-attachments/assets/93f4b07b-6d10-47c7-9f44-6d742636d03e" />
+<img width="1536" height="1024" alt="Pasted image 20260928085357" src="https://github.com/user-attachments/assets/ad8097ce-bcc6-4ec8-a00e-6faf57a85a15" />
+<img width="1137" height="780" alt="Pasted image 20260928085251" src="https://github.com/user-attachments/assets/ccd2fd57-af09-446d-b563-3c7f81d5263a" />
+
 
 > **Nota sobre los valores:** las IP mostradas son ejemplos reales de una ejecución del taller. Al recrear un Service o un Load Balancer, consulte nuevamente sus valores; no copie las IP como constantes permanentes.
 
