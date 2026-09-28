@@ -6,20 +6,39 @@
 
 <img width="1101" height="762" alt="Pasted image 20260928083200" src="https://github.com/user-attachments/assets/67731c28-76c6-414a-9c01-ec241b5538a4" />
 
-<img width="1143" height="773" alt="Pasted image 20260928085038" src="https://github.com/user-attachments/assets/62301cc3-e8c8-49b7-b8cd-9c4ec78a2df1" /><img width="1095" height="755" alt="Pasted image 20260928084946" src="https://github.com/user-attachments/assets/b1071928-43a7-496d-b80c-582fc04a00f2" />
-<img width="1137" height="826" alt="Pasted image 20260928084232" src="https://github.com/user-attachments/assets/fbfacee7-798b-49e5-aa01-b94fdcb75643" />
 <img width="1122" height="807" alt="Pasted image 20260928084016" src="https://github.com/user-attachments/assets/e8d36fcf-2d62-4cd2-b084-816ed6869eb9" />
 
+<img width="1137" height="826" alt="Pasted image 20260928084232" src="https://github.com/user-attachments/assets/fbfacee7-798b-49e5-aa01-b94fdcb75643" />
+
+<img width="1095" height="755" alt="Pasted image 20260928084946" src="https://github.com/user-attachments/assets/b1071928-43a7-496d-b80c-582fc04a00f2" />
+
+<img width="1143" height="773" alt="Pasted image 20260928085038" src="https://github.com/user-attachments/assets/62301cc3-e8c8-49b7-b8cd-9c4ec78a2df1" />
+
+<img width="1137" height="780" alt="Pasted image 20260928085251" src="https://github.com/user-attachments/assets/ccd2fd57-af09-446d-b563-3c7f81d5263a" />
+
+<img width="1536" height="1024" alt="Pasted image 20260928085357" src="https://github.com/user-attachments/assets/ad8097ce-bcc6-4ec8-a00e-6faf57a85a15" />
+
+<img width="1128" height="753" alt="Pasted image 20260928090153" src="https://github.com/user-attachments/assets/93f4b07b-6d10-47c7-9f44-6d742636d03e" />
+
+<img width="1123" height="800" alt="Pasted image 20260928090639" src="https://github.com/user-attachments/assets/c90d1af5-1b61-40f6-9806-154dbc6331f0" />
+
+<img width="1112" height="783" alt="Pasted image 20260928090819" src="https://github.com/user-attachments/assets/3fadb769-62fa-49dd-acad-30ddf5565a9c" />
+
+<img width="1116" height="783" alt="Pasted image 20260928090911" src="https://github.com/user-attachments/assets/79eb364a-b476-4306-bf49-8c4800f8cb04" />
+
+<img width="1147" height="758" alt="Pasted image 20260928092136" src="https://github.com/user-attachments/assets/f8f7f34f-b910-47ca-b343-b46853b09c58" />
+
+<img width="1113" height="793" alt="Pasted image 20260928092921" src="https://github.com/user-attachments/assets/ee362e6e-e067-40c9-8d86-bab765a67dc9" />
 
 <img width="395" height="72" alt="Pasted image 20260928093001" src="https://github.com/user-attachments/assets/153ca639-0e5b-4b6a-9c17-3322e35b6fc9" />
-<img width="1113" height="793" alt="Pasted image 20260928092921" src="https://github.com/user-attachments/assets/ee362e6e-e067-40c9-8d86-bab765a67dc9" />
-<img width="1147" height="758" alt="Pasted image 20260928092136" src="https://github.com/user-attachments/assets/f8f7f34f-b910-47ca-b343-b46853b09c58" />
-<img width="1116" height="783" alt="Pasted image 20260928090911" src="https://github.com/user-attachments/assets/79eb364a-b476-4306-bf49-8c4800f8cb04" />
-<img width="1112" height="783" alt="Pasted image 20260928090819" src="https://github.com/user-attachments/assets/3fadb769-62fa-49dd-acad-30ddf5565a9c" />
-<img width="1123" height="800" alt="Pasted image 20260928090639" src="https://github.com/user-attachments/assets/c90d1af5-1b61-40f6-9806-154dbc6331f0" />
-<img width="1128" height="753" alt="Pasted image 20260928090153" src="https://github.com/user-attachments/assets/93f4b07b-6d10-47c7-9f44-6d742636d03e" />
-<img width="1536" height="1024" alt="Pasted image 20260928085357" src="https://github.com/user-attachments/assets/ad8097ce-bcc6-4ec8-a00e-6faf57a85a15" />
-<img width="1137" height="780" alt="Pasted image 20260928085251" src="https://github.com/user-attachments/assets/ccd2fd57-af09-446d-b563-3c7f81d5263a" />
+
+
+
+
+
+
+
+
 
 
 > **Nota sobre los valores:** las IP mostradas son ejemplos reales de una ejecución del taller. Al recrear un Service o un Load Balancer, consulte nuevamente sus valores; no copie las IP como constantes permanentes.
