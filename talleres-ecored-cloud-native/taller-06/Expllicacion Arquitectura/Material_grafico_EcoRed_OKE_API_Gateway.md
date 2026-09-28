@@ -16,7 +16,7 @@
 
 <img width="1137" height="780" alt="Pasted image 20260928085251" src="https://github.com/user-attachments/assets/ccd2fd57-af09-446d-b563-3c7f81d5263a" />
 
-<img width="1536" height="1024" alt="Pasted image 20260928085357" src="https://github.com/user-attachments/assets/ad8097ce-bcc6-4ec8-a00e-6faf57a85a15" />
+
 
 <img width="1128" height="753" alt="Pasted image 20260928090153" src="https://github.com/user-attachments/assets/93f4b07b-6d10-47c7-9f44-6d742636d03e" />
 
@@ -44,9 +44,8 @@
 > **Nota sobre los valores:** las IP mostradas son ejemplos reales de una ejecución del taller. Al recrear un Service o un Load Balancer, consulte nuevamente sus valores; no copie las IP como constantes permanentes.
 
 ## 1. Arquitectura completa
+<img width="1536" height="1024" alt="Pasted image 20260928085357" src="https://github.com/user-attachments/assets/ad8097ce-bcc6-4ec8-a00e-6faf57a85a15" />
 
-
-![[Pasted image 20260928085357.png]]
 
 ![Mapa general de EcoRed](infografias/01-arquitectura-ecored.png)
 
