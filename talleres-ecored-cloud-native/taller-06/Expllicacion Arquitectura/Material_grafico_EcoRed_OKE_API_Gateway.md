@@ -1,10 +1,38 @@
-# Material gráfico: EcoRed en OKE con OCI API Gateway
+REGION - Availability Domain
 
+![[Pasted image 20260928082838.png]]
+
+![[Pasted image 20260928083200.png]]
+
+![[Pasted image 20260928084016.png]]
+![[Pasted image 20260928084232.png]]
+
+![[Pasted image 20260928084946.png]]
+
+![[Pasted image 20260928085038.png]]
+
+![[Pasted image 20260928085251.png]]
+
+![[Pasted image 20260928090153.png]]
+
+![[Pasted image 20260928090639.png]]
+
+![[Pasted image 20260928090819.png]]
+
+![[Pasted image 20260928090911.png]]
+
+![[Pasted image 20260928092136.png]]
+
+![[Pasted image 20260928093001.png]]
+![[Pasted image 20260928092921.png]]
 Este material acompaña el Taller 6 y explica, con los nombres y valores observados durante su ejecución, cómo se relacionan Kubernetes, OCI Load Balancer, OCI API Gateway, los NSG y los microservicios.
 
 > **Nota sobre los valores:** las IP mostradas son ejemplos reales de una ejecución del taller. Al recrear un Service o un Load Balancer, consulte nuevamente sus valores; no copie las IP como constantes permanentes.
 
 ## 1. Arquitectura completa
+
+
+![[Pasted image 20260928085357.png]]
 
 ![Mapa general de EcoRed](infografias/01-arquitectura-ecored.png)
 
